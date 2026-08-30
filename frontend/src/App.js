@@ -219,7 +219,7 @@ function App() {
                   {post.category}
                 </span>
                 {post.address && (
-                  <div style={{ color: '#666', fontSize: '0.9rem', marginBottom: '12px', padding: '8px 12px', background: '#f5f3f0', borderRadius: '8px', borderLeft: '3px solid #b8a88f' }}>
+                  <div style={{ color: post.category === '商用' ? '#9d7d54' : '#5a7c5b', fontSize: '0.9rem', marginBottom: '12px', padding: '8px 12px', background: post.category === '商用' ? '#e8dcc8' : '#d9e4d4', borderRadius: '8px', borderLeft: `3px solid ${post.category === '商用' ? '#b8a88f' : '#7fa87f'}` }}>
                     📍 {post.address}
                   </div>
                 )}
