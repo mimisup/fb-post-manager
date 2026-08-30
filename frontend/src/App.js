@@ -211,7 +211,9 @@ function App() {
 
     for (let i = 0; i < csvData.length; i++) {
       const row = csvData[i];
-      const { 分類, 地址, 文案, 圖片 } = row;
+      const 分類 = row.分類 || row.category;
+      const 地址 = row.地址 || row.address;
+      const 文案 = row.文案 || row.text;
 
       if (!分類 || !文案) {
         console.warn(`第 ${i + 1} 行：缺少分類或文案`);
