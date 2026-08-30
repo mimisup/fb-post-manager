@@ -500,8 +500,22 @@ function App() {
                     <div style={{ marginBottom: '16px' }}>
                       <label style={{ display: 'block', fontWeight: '600', fontSize: '0.9rem', marginBottom: '8px', color: '#2c3e50' }}>新增圖片</label>
                       <input type="file" multiple accept="image/*" onChange={(e) => handleEditImageUpload(editingId, Array.from(e.target.files))} style={{ width: '100%', padding: '8px 12px', border: '1.5px solid #e8e7e4', borderRadius: '8px', fontSize: '0.9rem' }} />
+
                       {(editingImages[editingId] || []).length > 0 && (
-                        <div style={{ marginTop: '8px', fontSize: '0.85rem', color: '#7fa87f' }}>✅ 已上傳 {(editingImages[editingId] || []).length} 張新圖片</div>
+                        <div style={{ marginTop: '12px' }}>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: '8px', marginBottom: '8px' }}>
+                            {(editingImages[editingId] || []).map((id, idx) => (
+                              <div key={idx} style={{ position: 'relative', width: '100%', height: '60px', backgroundColor: '#f0f0f0', borderRadius: '6px', overflow: 'hidden' }}>
+                                <img src={`${SUPABASE_URL}/storage/v1/object/public/images/${id}`} alt="new" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => e.target.style.display = 'none'} />
+                                <button onClick={() => {
+                                  const newImages = (editingImages[editingId] || []).filter((_, i) => i !== idx);
+                                  setEditingImages({ ...editingImages, [editingId]: newImages });
+                                }} style={{ position: 'absolute', top: '2px', right: '2px', background: 'rgba(0,0,0,0.6)', color: 'white', border: 'none', borderRadius: '50%', width: '20px', height: '20px', cursor: 'pointer', fontSize: '12px' }}>×</button>
+                              </div>
+                            ))}
+                          </div>
+                          <div style={{ fontSize: '0.85rem', color: '#7fa87f' }}>✅ 已上傳 {(editingImages[editingId] || []).length} 張新圖片</div>
+                        </div>
                       )}
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: 'auto' }}>
