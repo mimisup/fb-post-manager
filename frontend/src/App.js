@@ -143,26 +143,35 @@ function App() {
       return;
     }
 
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
     for (let i = 0; i < imageIds.length; i++) {
       const imageId = imageIds[i];
-      setTimeout(async () => {
-        try {
-          const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/images/${imageId}`;
-          const response = await fetch(imageUrl);
-          const blob = await response.blob();
+      const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/images/${imageId}`;
 
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = imageId.split('/').pop() || `image-${i}.jpg`;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          URL.revokeObjectURL(url);
-        } catch (error) {
-          console.error('下載失敗:', error);
-        }
-      }, i * 300);
+      if (isIOS) {
+        setTimeout(() => {
+          window.open(imageUrl, '_blank');
+        }, i * 100);
+      } else {
+        setTimeout(async () => {
+          try {
+            const response = await fetch(imageUrl);
+            const blob = await response.blob();
+
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = imageId.split('/').pop() || `image-${i}.jpg`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+          } catch (error) {
+            console.error('下載失敗:', error);
+          }
+        }, i * 300);
+      }
     }
   };
 
