@@ -4,6 +4,7 @@ import './App.css';
 
 const SUPABASE_URL = 'https://vqaetehnmsutaszzzdvz.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxYWV0ZWhubXN1dGFzenp6ZHZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgwNzE1NTgsImV4cCI6MjEwMzY0NzU1OH0.psuxi1DjezRX-tTjh4ZOrIsL07LelwM8qMrhJ9DJDyk';
+const VERSION = '1.0.0';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 function App() {
