@@ -143,26 +143,38 @@ function App() {
       return;
     }
 
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
     for (let i = 0; i < imageIds.length; i++) {
       const imageId = imageIds[i];
       setTimeout(async () => {
         try {
-          const { data, error } = await supabase.storage.from('images').download(imageId);
-          if (error) throw error;
+          const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/images/${imageId}`;
 
-          const url = URL.createObjectURL(data);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = imageId.split('/').pop() || `image-${i}.jpg`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
+          if (isIOS) {
+            window.open(imageUrl, '_blank');
+          } else {
+            const { data, error } = await supabase.storage.from('images').download(imageId);
+            if (error) throw error;
+
+            const url = URL.createObjectURL(data);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = imageId.split('/').pop() || `image-${i}.jpg`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+          }
         } catch (error) {
           console.error('下載圖片失敗:', error);
           alert(`圖片 ${i + 1} 下載失敗`);
         }
       }, i * 500);
+    }
+
+    if (isIOS) {
+      alert('圖片已在新視窗打開，長按圖片選擇「保存圖片」即可');
     }
   };
 
