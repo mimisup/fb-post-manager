@@ -22,6 +22,15 @@ db = SQLAlchemy(app)
 def init_db():
     if not hasattr(app, 'db_initialized'):
         db.create_all()
+
+        # Add address column to post table if it doesn't exist
+        with app.app_context():
+            try:
+                db.session.execute('ALTER TABLE post ADD COLUMN address VARCHAR(255)')
+                db.session.commit()
+            except:
+                pass  # Column already exists
+
         app.db_initialized = True
 
 # Models
