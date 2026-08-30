@@ -17,9 +17,12 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# Initialize database tables on app startup
-with app.app_context():
-    db.create_all()
+# Initialize database tables
+def init_db():
+    with app.app_context():
+        db.create_all()
+
+init_db()
 
 # Models
 class CopyText(db.Model):
