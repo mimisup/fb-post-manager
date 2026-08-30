@@ -283,14 +283,6 @@ function App() {
                     <span style={{ display: 'inline-block', padding: '6px 14px', borderRadius: '16px', fontSize: '0.8rem', fontWeight: '700', marginBottom: '16px', width: 'fit-content', background: post.category === '商用' ? '#e8dcc8' : '#d9e4d4', color: post.category === '商用' ? '#9d7d54' : '#5a7c5b', letterSpacing: '0.3px' }}>
                       {post.category}
                     </span>
-                    {post.address && (
-                      <div style={{ color: post.category === '商用' ? '#9d7d54' : '#5a7c5b', fontSize: '0.9rem', marginBottom: '12px', padding: '8px 12px', background: post.category === '商用' ? '#e8dcc8' : '#d9e4d4', borderRadius: '8px', borderLeft: `3px solid ${post.category === '商用' ? '#b8a88f' : '#7fa87f'}` }}>
-                        📍 {post.address}
-                      </div>
-                    )}
-                    <div style={{ color: '#2c3e50', fontSize: '0.95rem', lineHeight: '1.6', marginBottom: '16px', maxHeight: '120px', overflowY: 'auto', padding: '12px', background: '#fafaf8', borderRadius: '10px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                      {post.text}
-                    </div>
                     {post.image_ids && post.image_ids.length > 0 && (
                       <div style={{ marginBottom: '16px' }}>
                         <div style={{ marginBottom: '8px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: '8px' }}>
@@ -303,6 +295,14 @@ function App() {
                         <button onClick={() => downloadAllImages(post.image_ids.split(',').filter(Boolean))} style={{ width: '100%', padding: '8px', background: '#b8a88f', color: 'white', border: 'none', borderRadius: '8px', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer' }}>⬇️ 下載全部圖片</button>
                       </div>
                     )}
+                    {post.address && (
+                      <div style={{ color: post.category === '商用' ? '#9d7d54' : '#5a7c5b', fontSize: '0.9rem', marginBottom: '12px', padding: '8px 12px', background: post.category === '商用' ? '#e8dcc8' : '#d9e4d4', borderRadius: '8px', borderLeft: `3px solid ${post.category === '商用' ? '#b8a88f' : '#7fa87f'}` }}>
+                        📍 {post.address}
+                      </div>
+                    )}
+                    <div style={{ color: '#2c3e50', fontSize: '0.95rem', lineHeight: '1.6', marginBottom: '16px', maxHeight: '120px', overflowY: 'auto', padding: '12px', background: '#fafaf8', borderRadius: '10px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                      {post.text}
+                    </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: 'auto' }}>
                       <button onClick={() => copyText(post.text)} style={{ padding: '10px 14px', background: '#b8a88f', color: 'white', border: 'none', borderRadius: '10px', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease' }}>📋 複製文案</button>
                       <button onClick={() => startEdit(post)} style={{ padding: '10px 14px', background: '#d4c5b9', color: '#6b5544', border: 'none', borderRadius: '10px', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease' }}>✏️ 編輯</button>
