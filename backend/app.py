@@ -17,12 +17,12 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# Initialize database tables
+# Initialize database tables on first request
+@app.before_request
 def init_db():
-    with app.app_context():
+    if not hasattr(app, 'db_initialized'):
         db.create_all()
-
-init_db()
+        app.db_initialized = True
 
 # Models
 class CopyText(db.Model):
