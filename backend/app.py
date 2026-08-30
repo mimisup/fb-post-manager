@@ -5,7 +5,7 @@ from datetime import datetime
 import os
 
 app = Flask(__name__, static_folder='../frontend/build', static_url_path='')
-CORS(app, resources={r"/api/*": {"origins": "*", "methods": ["GET", "POST", "DELETE", "OPTIONS"], "allow_headers": ["Content-Type"]}})
+CORS(app, resources={r"/api/*": {"origins": "*", "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"], "allow_headers": ["Content-Type"]}})
 
 # Database config
 basedir = os.path.abspath(os.path.dirname(__file__))
