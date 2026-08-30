@@ -118,10 +118,6 @@ function App() {
     });
   };
 
-  const getImageUrl = (filepath) => {
-    return `${SUPABASE_URL}/storage/v1/object/public/images/${filepath}`;
-  };
-
   const deletePost = async (id) => {
     if (!window.confirm('確認刪除此貼文？')) return;
 
