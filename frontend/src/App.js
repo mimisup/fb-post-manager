@@ -130,14 +130,23 @@ function App() {
 
     for (let i = 0; i < imageIds.length; i++) {
       const imageId = imageIds[i];
-      setTimeout(() => {
-        const url = `${SUPABASE_URL}/storage/v1/object/public/images/${imageId}`;
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `image-${imageId}.jpg`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+      setTimeout(async () => {
+        try {
+          const { data, error } = await supabase.storage.from('images').download(imageId);
+          if (error) throw error;
+
+          const url = URL.createObjectURL(data);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = imageId.split('/').pop() || `image-${i}.jpg`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        } catch (error) {
+          console.error('下載圖片失敗:', error);
+          alert(`圖片 ${i + 1} 下載失敗`);
+        }
       }, i * 500);
     }
   };
