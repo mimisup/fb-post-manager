@@ -129,6 +129,13 @@ def upload_image():
     db.session.commit()
     return jsonify(image.to_dict()), 201
 
+@app.route('/api/images/<int:id>', methods=['GET'])
+def get_image(id):
+    image = Image.query.get(id)
+    if image and os.path.exists(image.filepath):
+        return send_from_directory(os.path.dirname(image.filepath), os.path.basename(image.filepath))
+    return jsonify({'error': 'Not found'}), 404
+
 @app.route('/api/images/<int:id>', methods=['DELETE'])
 def delete_image(id):
     image = Image.query.get(id)

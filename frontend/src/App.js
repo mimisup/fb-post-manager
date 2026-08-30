@@ -54,10 +54,25 @@ function App() {
     }
 
     try {
+      let imageIds = [];
+
+      // Upload images first
+      for (const file of selectedImages) {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('category', postCategory);
+
+        const imgRes = await axios.post(`${API_BASE}/images`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        imageIds.push(imgRes.data.id);
+      }
+
+      // Then create post with image IDs
       await axios.post(`${API_BASE}/posts`, {
         category: postCategory,
         text: postContent,
-        image_ids: []
+        image_ids: imageIds
       });
 
       loadPosts();
