@@ -250,8 +250,8 @@ function App() {
         </div>
 
         <div style={{ display: 'flex', gap: '10px', marginBottom: '32px', justifyContent: 'center', flexWrap: 'wrap' }}>
-          {['全部', '商用', '住用'].map((cat, i) => (
-            <button key={cat} onClick={(e) => filterPosts(cat, e.target)} className="filter-btn" style={{ padding: '10px 22px', border: '1.5px solid #e8e7e4', background: i === 0 ? '#b8a88f' : 'white', color: i === 0 ? 'white' : '#666', borderRadius: '20px', cursor: 'pointer', fontWeight: '600', fontSize: '0.9rem', transition: 'all 0.3s ease' }}>
+          {['全部', '商用', '住用'].map((cat) => (
+            <button key={cat} onClick={() => setCurrentFilter(cat)} style={{ padding: '10px 22px', border: '1.5px solid #e8e7e4', background: currentFilter === cat ? '#b8a88f' : 'white', color: currentFilter === cat ? 'white' : '#666', borderRadius: '20px', cursor: 'pointer', fontWeight: '600', fontSize: '0.9rem', transition: 'all 0.3s ease' }}>
               {cat}
             </button>
           ))}
