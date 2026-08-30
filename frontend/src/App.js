@@ -137,7 +137,7 @@ function App() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '24px' }}>
             <div>
               <label style={{ display: 'block', fontWeight: '600', fontSize: '0.95rem', marginBottom: '10px', color: '#2c3e50', letterSpacing: '0.2px' }}>分類</label>
-              <select value={postCategory} onChange={(e) => setPostCategory(e.target.value)} style={{ width: '100%', padding: '12px 14px', border: '1.5px solid #e8e7e4', borderRadius: '10px', fontSize: '0.95rem', fontFamily: 'inherit', color: '#2c3e50', background: '#fafaf8', transition: 'all 0.3s ease', cursor: 'pointer' }}>
+              <select value={postCategory} onChange={(e) => setPostCategory(e.target.value)} style={{ width: '100%', padding: '12px 14px', border: '1.5px solid #e8e7e4', borderRadius: '10px', fontSize: '0.95rem', fontFamily: 'inherit', color: '#2c3e50', background: '#fafaf8', transition: 'all 0.3s ease', cursor: 'pointer', height: '44px', display: 'flex', alignItems: 'center' }}>
                 <option value="商用">商用</option>
                 <option value="住用">住用</option>
               </select>
@@ -145,7 +145,7 @@ function App() {
 
             <div>
               <label style={{ display: 'block', fontWeight: '600', fontSize: '0.95rem', marginBottom: '10px', color: '#2c3e50', letterSpacing: '0.2px' }}>上傳圖片</label>
-              <input type="file" id="imageUpload" multiple accept="image/*" onChange={handleImageChange} style={{ width: '100%', padding: '12px 14px', border: '1.5px solid #e8e7e4', borderRadius: '10px', fontSize: '0.95rem', fontFamily: 'inherit', color: '#2c3e50', background: '#fafaf8', cursor: 'pointer' }} />
+              <input type="file" id="imageUpload" multiple accept="image/*" onChange={handleImageChange} style={{ width: '100%', padding: '12px 14px', border: '1.5px solid #e8e7e4', borderRadius: '10px', fontSize: '0.95rem', fontFamily: 'inherit', color: '#2c3e50', background: '#fafaf8', cursor: 'pointer', height: '44px', display: 'flex', alignItems: 'center' }} />
             </div>
           </div>
 
