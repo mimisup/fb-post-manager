@@ -137,62 +137,18 @@ function App() {
     });
   };
 
-  const downloadAllImages = async (imageIds) => {
+  const downloadAllImages = (imageIds) => {
     if (!imageIds || imageIds.length === 0) {
       alert('此貼文無圖片');
       return;
     }
 
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-
-    if (isIOS && navigator.share) {
-      try {
-        const files = await Promise.all(
-          imageIds.map(async (imageId) => {
-            const response = await fetch(`${SUPABASE_URL}/storage/v1/object/public/images/${imageId}`);
-            const blob = await response.blob();
-            return new File([blob], imageId.split('/').pop() || 'image.jpg', { type: 'image/jpeg' });
-          })
-        );
-
-        if (files.length > 0) {
-          await navigator.share({
-            files: files,
-            title: '下載圖片',
-            text: '分享圖片到相簿'
-          });
-        }
-      } catch (error) {
-        console.error('分享失敗:', error);
-        imageIds.slice(0, 1).forEach(imageId => {
-          const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/images/${imageId}`;
-          window.open(imageUrl, '_blank');
-        });
-        alert('只能一次打開一張，請長按保存');
-      }
-    } else {
-      for (let i = 0; i < imageIds.length; i++) {
-        const imageId = imageIds[i];
-        const delay = Math.min(i * 200, 1000);
-        setTimeout(async () => {
-          try {
-            const { data, error } = await supabase.storage.from('images').download(imageId);
-            if (error) throw error;
-
-            const url = URL.createObjectURL(data);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = imageId.split('/').pop() || `image-${i}.jpg`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-          } catch (error) {
-            console.error('下載圖片失敗:', error);
-          }
-        }, delay);
-      }
-    }
+    imageIds.forEach((imageId, index) => {
+      const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/images/${imageId}`;
+      setTimeout(() => {
+        window.open(imageUrl, '_blank');
+      }, index * 100);
+    });
   };
 
   const deletePost = async (id) => {
