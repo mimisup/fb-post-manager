@@ -58,6 +58,7 @@ class Image(db.Model):
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     category = db.Column(db.String(50), nullable=False)
+    address = db.Column(db.String(255))
     text = db.Column(db.Text)
     image_ids = db.Column(db.String(500))  # Comma-separated image IDs
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -66,6 +67,7 @@ class Post(db.Model):
         return {
             'id': self.id,
             'category': self.category,
+            'address': self.address,
             'text': self.text,
             'image_ids': self.image_ids.split(',') if self.image_ids else [],
             'created_at': self.created_at.isoformat()
@@ -163,7 +165,7 @@ def get_posts():
 def create_post():
     data = request.json
     image_ids = ','.join(data.get('image_ids', [])) if data.get('image_ids') else ''
-    post = Post(category=data['category'], text=data.get('text'), image_ids=image_ids)
+    post = Post(category=data['category'], address=data.get('address'), text=data.get('text'), image_ids=image_ids)
     db.session.add(post)
     db.session.commit()
     return jsonify(post.to_dict()), 201

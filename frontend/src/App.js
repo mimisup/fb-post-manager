@@ -8,6 +8,7 @@ function App() {
   const [posts, setPosts] = useState([]);
   const [currentFilter, setCurrentFilter] = useState('全部');
   const [postCategory, setPostCategory] = useState('商用');
+  const [postAddress, setPostAddress] = useState('');
   const [postContent, setPostContent] = useState('');
   const [selectedImages, setSelectedImages] = useState([]);
   const [imagePreview, setImagePreview] = useState([]);
@@ -71,6 +72,7 @@ function App() {
       // Then create post with image IDs
       await axios.post(`${API_BASE}/posts`, {
         category: postCategory,
+        address: postAddress,
         text: postContent,
         image_ids: imageIds
       });
@@ -85,6 +87,7 @@ function App() {
 
   const resetForm = () => {
     setPostCategory('商用');
+    setPostAddress('');
     setPostContent('');
     setSelectedImages([]);
     setImagePreview([]);
@@ -159,9 +162,14 @@ function App() {
             </div>
 
             <div>
-              <label style={{ display: 'block', fontWeight: '600', fontSize: '0.95rem', marginBottom: '10px', color: '#2c3e50', letterSpacing: '0.2px' }}>上傳圖片</label>
-              <input type="file" id="imageUpload" multiple accept="image/*" onChange={handleImageChange} style={{ width: '100%', padding: '12px 14px', border: '1.5px solid #e8e7e4', borderRadius: '10px', fontSize: '0.95rem', fontFamily: 'inherit', color: '#2c3e50', background: '#fafaf8', cursor: 'pointer', height: '44px', display: 'flex', alignItems: 'center' }} />
+              <label style={{ display: 'block', fontWeight: '600', fontSize: '0.95rem', marginBottom: '10px', color: '#2c3e50', letterSpacing: '0.2px' }}>地址</label>
+              <input type="text" value={postAddress} onChange={(e) => setPostAddress(e.target.value)} placeholder="輸入房產地址..." style={{ width: '100%', padding: '12px 14px', border: '1.5px solid #e8e7e4', borderRadius: '10px', fontSize: '0.95rem', fontFamily: 'inherit', color: '#2c3e50', background: '#fafaf8', height: '44px' }} />
             </div>
+          </div>
+
+          <div style={{ marginBottom: '24px' }}>
+            <label style={{ display: 'block', fontWeight: '600', fontSize: '0.95rem', marginBottom: '10px', color: '#2c3e50', letterSpacing: '0.2px' }}>上傳圖片</label>
+            <input type="file" id="imageUpload" multiple accept="image/*" onChange={handleImageChange} style={{ width: '100%', padding: '12px 14px', border: '1.5px solid #e8e7e4', borderRadius: '10px', fontSize: '0.95rem', fontFamily: 'inherit', color: '#2c3e50', background: '#fafaf8', cursor: 'pointer', height: '44px', display: 'flex', alignItems: 'center' }} />
           </div>
 
           <div style={{ marginBottom: '24px' }}>
@@ -210,6 +218,11 @@ function App() {
                 <span style={{ display: 'inline-block', padding: '6px 14px', borderRadius: '16px', fontSize: '0.8rem', fontWeight: '700', marginBottom: '16px', width: 'fit-content', background: post.category === '商用' ? '#e8dcc8' : '#d9e4d4', color: post.category === '商用' ? '#9d7d54' : '#5a7c5b', letterSpacing: '0.3px' }}>
                   {post.category}
                 </span>
+                {post.address && (
+                  <div style={{ color: '#666', fontSize: '0.9rem', marginBottom: '12px', padding: '8px 12px', background: '#f5f3f0', borderRadius: '8px', borderLeft: '3px solid #b8a88f' }}>
+                    📍 {post.address}
+                  </div>
+                )}
                 <div style={{ color: '#2c3e50', fontSize: '0.95rem', lineHeight: '1.6', marginBottom: '16px', maxHeight: '120px', overflowY: 'auto', padding: '12px', background: '#fafaf8', borderRadius: '10px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
                   {post.text}
                 </div>
