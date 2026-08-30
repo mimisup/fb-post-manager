@@ -145,16 +145,35 @@ function App() {
 
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
-    if (isIOS) {
-      imageIds.forEach(imageId => {
-        const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/images/${imageId}`;
-        window.open(imageUrl, '_blank');
-      });
-      alert('圖片已打開，長按選擇「保存圖片」');
+    if (isIOS && navigator.share) {
+      try {
+        const files = await Promise.all(
+          imageIds.map(async (imageId) => {
+            const response = await fetch(`${SUPABASE_URL}/storage/v1/object/public/images/${imageId}`);
+            const blob = await response.blob();
+            return new File([blob], imageId.split('/').pop() || 'image.jpg', { type: 'image/jpeg' });
+          })
+        );
+
+        if (files.length > 0) {
+          await navigator.share({
+            files: files,
+            title: '下載圖片',
+            text: '分享圖片到相簿'
+          });
+        }
+      } catch (error) {
+        console.error('分享失敗:', error);
+        imageIds.slice(0, 1).forEach(imageId => {
+          const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/images/${imageId}`;
+          window.open(imageUrl, '_blank');
+        });
+        alert('只能一次打開一張，請長按保存');
+      }
     } else {
       for (let i = 0; i < imageIds.length; i++) {
         const imageId = imageIds[i];
-        const delay = Math.min(i * 100, 500);
+        const delay = Math.min(i * 200, 1000);
         setTimeout(async () => {
           try {
             const { data, error } = await supabase.storage.from('images').download(imageId);
