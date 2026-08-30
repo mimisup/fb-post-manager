@@ -358,7 +358,7 @@ function App() {
 
   const markAsPosted = async (postId) => {
     try {
-      const now = new Date().toISOString().split('T')[0];
+      const now = new Date().toISOString();
       await supabase.from('posts').update({ posted_at: now }).eq('id', postId);
       loadPosts();
     } catch (error) {
@@ -567,7 +567,7 @@ function App() {
                         {post.category}
                       </span>
                       <button onClick={() => markAsPosted(post.id)} style={{ padding: '6px 12px', background: post.posted_at ? '#7fa87f' : '#f0ebe4', color: post.posted_at ? 'white' : '#888', border: 'none', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease', whiteSpace: 'nowrap' }}>
-                        {post.posted_at ? `✓ ${new Date(post.posted_at).toLocaleDateString('zh-TW')}` : '標記為已發'}
+                        {post.posted_at ? `✓ ${new Date(post.posted_at).toLocaleDateString('zh-TW')} ${new Date(post.posted_at).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })}` : '標記為已發'}
                       </button>
                     </div>
                     {post.image_ids && post.image_ids.length > 0 && (
