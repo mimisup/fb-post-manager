@@ -73,7 +73,8 @@ function App() {
       for (const file of selectedImages) {
         const timestamp = Date.now();
         const randomStr = Math.random().toString(36).substring(7);
-        const fileName = `public/${timestamp}-${randomStr}-${file.name}`;
+        const ext = file.name.split('.').pop() || 'jpg';
+        const fileName = `public/${timestamp}-${randomStr}.${ext}`;
         const { data: uploadData, error: uploadError } = await supabase.storage.from('images').upload(fileName, file);
 
         if (!uploadError && uploadData) {
