@@ -16,6 +16,7 @@ function App() {
   const [imagePreview, setImagePreview] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [editData, setEditData] = useState({});
+  const [searchAddress, setSearchAddress] = useState('');
 
   useEffect(() => {
     loadPosts();
@@ -174,9 +175,9 @@ function App() {
     }
   };
 
-  const filteredPosts = currentFilter === '全部'
-    ? posts
-    : posts.filter(p => p.category === currentFilter);
+  const filteredPosts = posts
+    .filter(p => currentFilter === '全部' || p.category === currentFilter)
+    .filter(p => !searchAddress || (p.address && p.address.includes(searchAddress)));
 
   return (
     <div style={{ background: 'linear-gradient(135deg, #faf9f6 0%, #f8f9fa 100%)', minHeight: '100vh', padding: '40px 20px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", sans-serif', color: '#2c3e50' }}>
@@ -232,6 +233,11 @@ function App() {
             <button onClick={resetForm} style={{ padding: '12px 28px', border: '1.5px solid #e8e7e4', background: '#e8e7e4', borderRadius: '24px', cursor: 'pointer', fontSize: '0.95rem', fontWeight: '600', color: '#2c3e50', transition: 'all 0.3s ease' }}>清空</button>
             <button onClick={addPost} style={{ padding: '12px 28px', background: 'linear-gradient(135deg, #b8a88f 0%, #a89680 100%)', color: 'white', border: 'none', borderRadius: '24px', cursor: 'pointer', fontSize: '0.95rem', fontWeight: '600', transition: 'all 0.3s ease', flex: 1 }}>儲存貼文</button>
           </div>
+        </div>
+
+        <div style={{ marginBottom: '24px' }}>
+          <label style={{ display: 'block', fontWeight: '600', fontSize: '0.95rem', marginBottom: '10px', color: '#2c3e50', letterSpacing: '0.2px' }}>查詢地址</label>
+          <input type="text" value={searchAddress} onChange={(e) => setSearchAddress(e.target.value)} placeholder="輸入地址關鍵字搜尋..." style={{ width: '100%', padding: '12px 14px', border: '1.5px solid #e8e7e4', borderRadius: '10px', fontSize: '0.95rem', fontFamily: 'inherit', color: '#2c3e50', background: '#fafaf8' }} />
         </div>
 
         <div style={{ display: 'flex', gap: '10px', marginBottom: '32px', justifyContent: 'center', flexWrap: 'wrap' }}>
