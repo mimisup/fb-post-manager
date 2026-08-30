@@ -13,15 +13,18 @@ DATABASE_URL = os.environ.get('DATABASE_URL')
 if DATABASE_URL:
     if DATABASE_URL.startswith('postgres://'):
         DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
+    DATABASE_URL = DATABASE_URL + '?sslmode=require'
     app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 else:
-    # Use SQLite as fallback
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///fb_posts.db'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'pool_pre_ping': True,
+    'pool_recycle': 3600
+}
 
-print(f"📊 Database: {app.config['SQLALCHEMY_DATABASE_URI']}")
+db = SQLAlchemy(app)
 
 # Models
 class CopyText(db.Model):
