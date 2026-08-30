@@ -63,19 +63,22 @@ function App() {
       let imageIds = [];
 
       for (const file of selectedImages) {
-        const fileName = `${Date.now()}-${file.name}`;
-        const { error: uploadError } = await supabase.storage.from('images').upload(fileName, file);
+        const fileName = `public/${Date.now()}-${file.name}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage.from('images').upload(fileName, file);
 
-        if (!uploadError) {
+        if (!uploadError && uploadData) {
           const { data: imgData } = await supabase.from('images').insert({
             category: postCategory,
             filename: file.name,
-            filepath: fileName
+            filepath: uploadData.path
           }).select();
 
           if (imgData && imgData.length > 0) {
-            imageIds.push(imgData[0].id);
+            imageIds.push(uploadData.path);
           }
+        } else {
+          console.error('Upload error:', uploadError);
+          alert('圖片上傳失敗，請重試');
         }
       }
 
