@@ -71,26 +71,36 @@ function App() {
       let imageIds = [];
 
       for (const file of selectedImages) {
-        const timestamp = Date.now();
-        const randomStr = Math.random().toString(36).substring(7);
-        const ext = file.name.split('.').pop() || 'jpg';
-        const fileName = `public/${timestamp}-${randomStr}.${ext}`;
-        const { data: uploadData, error: uploadError } = await supabase.storage.from('images').upload(fileName, file);
+        try {
+          const timestamp = Date.now();
+          const randomStr = Math.random().toString(36).substring(7);
+          const ext = file.name.split('.').pop() || 'jpg';
+          const fileName = `${timestamp}-${randomStr}.${ext}`;
 
-        if (!uploadError && uploadData) {
-          const { data: imgData } = await supabase.from('images').insert({
-            category: postCategory,
-            filename: file.name,
-            filepath: uploadData.path
-          }).select();
+          console.log('Uploading:', fileName);
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('images')
+            .upload(fileName, file, { upsert: false });
 
-          if (imgData && imgData.length > 0) {
-            imageIds.push(uploadData.path);
+          if (!uploadError && uploadData) {
+            const { data: imgData } = await supabase.from('images').insert({
+              category: postCategory,
+              filename: file.name,
+              filepath: uploadData.path
+            }).select();
+
+            if (imgData && imgData.length > 0) {
+              imageIds.push(uploadData.path);
+            }
+          } else {
+            console.error('Upload error:', uploadError);
+            alert(`圖片上傳失敗: ${uploadError?.message || '未知錯誤'}`);
+            throw uploadError;
           }
-        } else {
-          console.error('Upload error:', uploadError);
-          alert(`圖片上傳失敗: ${uploadError?.message || '未知錯誤'}`);
-          throw uploadError;
+        } catch (err) {
+          console.error('File upload exception:', err);
+          alert(`上傳異常: ${err?.message || '未知錯誤'}`);
+          throw err;
         }
       }
 
