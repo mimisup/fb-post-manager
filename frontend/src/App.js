@@ -18,6 +18,7 @@ function App() {
   const [editingId, setEditingId] = useState(null);
   const [editData, setEditData] = useState({});
   const [searchAddress, setSearchAddress] = useState('');
+  const [editingImages, setEditingImages] = useState({});
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [selectedPostImages, setSelectedPostImages] = useState({});
   const [csvData, setCsvData] = useState([]);
@@ -220,28 +221,6 @@ function App() {
       try {
         let imageIds = [];
 
-        if (圖片) {
-          const imageUrls = 圖片.split('|').map(url => url.trim()).filter(Boolean);
-
-          for (const imageUrl of imageUrls) {
-            try {
-              const response = await fetch(imageUrl);
-              const blob = await response.blob();
-              const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
-
-              const { data: uploadData, error: uploadError } = await supabase.storage
-                .from('images')
-                .upload(fileName, blob);
-
-              if (!uploadError && uploadData) {
-                imageIds.push(uploadData.path);
-              }
-            } catch (error) {
-              console.error(`圖片下載失敗: ${imageUrl}`, error);
-            }
-          }
-        }
-
         const { error: postError } = await supabase.from('posts').insert({
           category: 分類,
           address: 地址 || '',
@@ -322,14 +301,45 @@ function App() {
       text: post.text || '',
       image_ids: post.image_ids || ''
     });
+    setEditingImages({ [post.id]: [] });
+  };
+
+  const handleEditImageUpload = async (postId, files) => {
+    const newImages = editingImages[postId] || [];
+
+    for (const file of files) {
+      try {
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('images')
+          .upload(fileName, file);
+
+        if (!uploadError && uploadData) {
+          newImages.push(uploadData.path);
+        }
+      } catch (error) {
+        console.error('圖片上傳失敗:', error);
+      }
+    }
+
+    setEditingImages({ ...editingImages, [postId]: newImages });
   };
 
   const saveEdit = async () => {
     try {
-      await supabase.from('posts').update(editData).eq('id', editingId);
+      const newImages = editingImages[editingId] || [];
+      const existingImages = editData.image_ids ? editData.image_ids.split(',').filter(Boolean) : [];
+      const allImages = [...existingImages, ...newImages].join(',');
+
+      await supabase.from('posts').update({
+        ...editData,
+        image_ids: allImages
+      }).eq('id', editingId);
+
       loadPosts();
       setEditingId(null);
       setEditData({});
+      setEditingImages({});
     } catch (error) {
       console.error('Error updating post:', error);
       alert('編輯失敗');
@@ -484,6 +494,13 @@ function App() {
                     <div style={{ marginBottom: '16px' }}>
                       <label style={{ display: 'block', fontWeight: '600', fontSize: '0.9rem', marginBottom: '8px', color: '#2c3e50' }}>文案</label>
                       <textarea value={editData.text} onChange={(e) => setEditData({...editData, text: e.target.value})} style={{ width: '100%', padding: '8px 12px', border: '1.5px solid #e8e7e4', borderRadius: '8px', fontSize: '0.9rem', minHeight: '80px', resize: 'vertical' }} />
+                    </div>
+                    <div style={{ marginBottom: '16px' }}>
+                      <label style={{ display: 'block', fontWeight: '600', fontSize: '0.9rem', marginBottom: '8px', color: '#2c3e50' }}>新增圖片</label>
+                      <input type="file" multiple accept="image/*" onChange={(e) => handleEditImageUpload(editingId, Array.from(e.target.files))} style={{ width: '100%', padding: '8px 12px', border: '1.5px solid #e8e7e4', borderRadius: '8px', fontSize: '0.9rem' }} />
+                      {(editingImages[editingId] || []).length > 0 && (
+                        <div style={{ marginTop: '8px', fontSize: '0.85rem', color: '#7fa87f' }}>✅ 已上傳 {(editingImages[editingId] || []).length} 張新圖片</div>
+                      )}
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: 'auto' }}>
                       <button onClick={saveEdit} style={{ padding: '10px 14px', background: '#b8a88f', color: 'white', border: 'none', borderRadius: '10px', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer' }}>💾 保存</button>
