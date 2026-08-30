@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
+import Papa from 'papaparse';
 import './App.css';
 
 const SUPABASE_URL = 'https://vqaetehnmsutaszzzdvz.supabase.co';
@@ -19,6 +20,8 @@ function App() {
   const [searchAddress, setSearchAddress] = useState('');
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [selectedPostImages, setSelectedPostImages] = useState({});
+  const [csvData, setCsvData] = useState([]);
+  const [importProgress, setImportProgress] = useState(0);
 
   useEffect(() => {
     loadPosts();
@@ -177,6 +180,91 @@ function App() {
     setSelectedPostImages({ ...selectedPostImages, [postId]: newSelected });
   };
 
+  const handleCsvUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (results) => {
+        setCsvData(results.data);
+      },
+      error: (error) => {
+        alert(`CSV 解析失敗: ${error.message}`);
+      }
+    });
+  };
+
+  const importFromCsv = async () => {
+    if (csvData.length === 0) {
+      alert('請先上傳 CSV 檔案');
+      return;
+    }
+
+    const confirmed = window.confirm(`確認匯入 ${csvData.length} 筆貼文？`);
+    if (!confirmed) return;
+
+    setImportProgress(0);
+    let successCount = 0;
+
+    for (let i = 0; i < csvData.length; i++) {
+      const row = csvData[i];
+      const { 分類, 地址, 文案, 圖片 } = row;
+
+      if (!分類 || !文案) {
+        console.warn(`第 ${i + 1} 行：缺少分類或文案`);
+        continue;
+      }
+
+      try {
+        let imageIds = [];
+
+        if (圖片) {
+          const imageUrls = 圖片.split('|').map(url => url.trim()).filter(Boolean);
+
+          for (const imageUrl of imageUrls) {
+            try {
+              const response = await fetch(imageUrl);
+              const blob = await response.blob();
+              const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
+
+              const { data: uploadData, error: uploadError } = await supabase.storage
+                .from('images')
+                .upload(fileName, blob);
+
+              if (!uploadError && uploadData) {
+                imageIds.push(uploadData.path);
+              }
+            } catch (error) {
+              console.error(`圖片下載失敗: ${imageUrl}`, error);
+            }
+          }
+        }
+
+        const { error: postError } = await supabase.from('posts').insert({
+          category: 分類,
+          address: 地址 || '',
+          text: 文案,
+          image_ids: imageIds.join(',')
+        });
+
+        if (!postError) {
+          successCount++;
+        }
+      } catch (error) {
+        console.error(`第 ${i + 1} 行匯入失敗:`, error);
+      }
+
+      setImportProgress(((i + 1) / csvData.length) * 100);
+    }
+
+    alert(`匯入完成！成功: ${successCount}/${csvData.length}`);
+    setCsvData([]);
+    setImportProgress(0);
+    loadPosts();
+  };
+
   const downloadAllImages = async (imageIds) => {
     if (!imageIds || imageIds.length === 0) {
       alert('此貼文無圖片');
@@ -261,7 +349,49 @@ function App() {
         </div>
 
         <div style={{ background: 'white', borderRadius: '16px', padding: isMobile ? '20px' : '40px', marginBottom: '40px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.04)', border: '1px solid rgba(0, 0, 0, 0.02)' }}>
-          <h2 style={{ fontSize: isMobile ? '1.1rem' : '1.3rem', fontWeight: '600', marginBottom: isMobile ? '16px' : '28px', color: '#2c3e50' }}>建立新貼文</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '28px' }}>
+            <button onClick={() => document.getElementById('csvFile').click()} style={{ padding: '12px', background: '#d4c5b9', color: '#6b5544', border: 'none', borderRadius: '10px', fontWeight: '600', cursor: 'pointer' }}>📋 匯入 CSV</button>
+            {csvData.length > 0 && (
+              <button onClick={importFromCsv} style={{ padding: '12px', background: '#7fa87f', color: 'white', border: 'none', borderRadius: '10px', fontWeight: '600', cursor: 'pointer' }}>✅ 開始匯入 ({csvData.length})</button>
+            )}
+          </div>
+          <input type="file" id="csvFile" accept=".csv" onChange={handleCsvUpload} style={{ display: 'none' }} />
+
+          {csvData.length > 0 && (
+            <div style={{ marginBottom: '28px', padding: '12px', background: '#f5f5f5', borderRadius: '10px', maxHeight: '300px', overflowY: 'auto' }}>
+              <h3 style={{ fontSize: '0.95rem', fontWeight: '600', marginBottom: '12px' }}>預覽 ({csvData.length} 筆)</h3>
+              <table style={{ width: '100%', fontSize: '0.85rem', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ borderBottom: '2px solid #ddd' }}>
+                    <th style={{ padding: '8px', textAlign: 'left' }}>分類</th>
+                    <th style={{ padding: '8px', textAlign: 'left' }}>地址</th>
+                    <th style={{ padding: '8px', textAlign: 'left' }}>文案</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {csvData.slice(0, 5).map((row, i) => (
+                    <tr key={i} style={{ borderBottom: '1px solid #eee' }}>
+                      <td style={{ padding: '8px' }}>{row.分類}</td>
+                      <td style={{ padding: '8px' }}>{row.地址}</td>
+                      <td style={{ padding: '8px', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.文案}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {csvData.length > 5 && <p style={{ fontSize: '0.8rem', color: '#999', marginTop: '8px' }}>...還有 {csvData.length - 5} 筆</p>}
+            </div>
+          )}
+
+          {importProgress > 0 && importProgress < 100 && (
+            <div style={{ marginBottom: '28px', padding: '12px', background: '#e8dcc8', borderRadius: '10px' }}>
+              <div style={{ fontSize: '0.9rem', marginBottom: '8px' }}>匯入進度: {Math.round(importProgress)}%</div>
+              <div style={{ width: '100%', height: '8px', background: '#ddd', borderRadius: '4px', overflow: 'hidden' }}>
+                <div style={{ width: `${importProgress}%`, height: '100%', background: '#7fa87f', transition: 'width 0.3s' }}></div>
+              </div>
+            </div>
+          )}
+
+          <h2 style={{ fontSize: isMobile ? '1.1rem' : '1.3rem', fontWeight: '600', marginBottom: isMobile ? '16px' : '28px', color: '#2c3e50' }}>或建立新貼文</h2>
 
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '24px', marginBottom: '24px' }}>
             <div>
