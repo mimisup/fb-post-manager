@@ -71,7 +71,9 @@ function App() {
       let imageIds = [];
 
       for (const file of selectedImages) {
-        const fileName = `public/${Date.now()}-${file.name}`;
+        const timestamp = Date.now();
+        const randomStr = Math.random().toString(36).substring(7);
+        const fileName = `public/${timestamp}-${randomStr}-${file.name}`;
         const { data: uploadData, error: uploadError } = await supabase.storage.from('images').upload(fileName, file);
 
         if (!uploadError && uploadData) {
@@ -86,7 +88,8 @@ function App() {
           }
         } else {
           console.error('Upload error:', uploadError);
-          alert('圖片上傳失敗，請重試');
+          alert(`圖片上傳失敗: ${uploadError?.message || '未知錯誤'}`);
+          throw uploadError;
         }
       }
 
