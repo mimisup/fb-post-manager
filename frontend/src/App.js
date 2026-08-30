@@ -18,6 +18,7 @@ function App() {
   const [editData, setEditData] = useState({});
   const [searchAddress, setSearchAddress] = useState('');
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [selectedPostImages, setSelectedPostImages] = useState({});
 
   useEffect(() => {
     loadPosts();
@@ -135,6 +136,45 @@ function App() {
     }).catch(() => {
       alert('複製失敗');
     });
+  };
+
+  const shareSelectedImages = async (postId, imageIds) => {
+    const selectedIds = selectedPostImages[postId] || [];
+    if (selectedIds.length === 0) {
+      alert('請先勾選要分享的圖片');
+      return;
+    }
+
+    try {
+      const files = await Promise.all(
+        selectedIds.map(async (imageId) => {
+          const response = await fetch(`${SUPABASE_URL}/storage/v1/object/public/images/${imageId}`);
+          const blob = await response.blob();
+          return new File([blob], imageId.split('/').pop() || 'image.jpg', { type: 'image/jpeg' });
+        })
+      );
+
+      if (navigator.share && navigator.canShare && navigator.canShare({ files })) {
+        await navigator.share({
+          files: files,
+          title: '分享圖片',
+          text: '分享到相簿'
+        });
+        setSelectedPostImages({ ...selectedPostImages, [postId]: [] });
+      } else {
+        alert('您的設備不支持分享功能，請升級 iOS 或使用其他瀏覽器');
+      }
+    } catch (error) {
+      console.error('分享失敗:', error);
+    }
+  };
+
+  const toggleImageSelection = (postId, imageId) => {
+    const selected = selectedPostImages[postId] || [];
+    const newSelected = selected.includes(imageId)
+      ? selected.filter(id => id !== imageId)
+      : [...selected, imageId];
+    setSelectedPostImages({ ...selectedPostImages, [postId]: newSelected });
   };
 
   const downloadAllImages = async (imageIds) => {
@@ -319,13 +359,22 @@ function App() {
                     {post.image_ids && post.image_ids.length > 0 && (
                       <div style={{ marginBottom: '16px' }}>
                         <div style={{ marginBottom: '8px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: '8px' }}>
-                          {post.image_ids.split(',').filter(Boolean).map(id => (
-                            <div key={id} style={{ width: '100%', height: '70px', backgroundColor: '#f0f0f0', borderRadius: '8px', overflow: 'hidden', cursor: 'pointer' }}>
-                              <img src={`${SUPABASE_URL}/storage/v1/object/public/images/${id}`} alt="post" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => e.target.style.display = 'none'} />
-                            </div>
-                          ))}
+                          {post.image_ids.split(',').filter(Boolean).map(id => {
+                            const isSelected = (selectedPostImages[post.id] || []).includes(id);
+                            return (
+                              <div key={id} onClick={() => toggleImageSelection(post.id, id)} style={{ width: '100%', height: '70px', backgroundColor: '#f0f0f0', borderRadius: '8px', overflow: 'hidden', cursor: 'pointer', position: 'relative', border: isSelected ? '3px solid #b8a88f' : 'none', boxSizing: 'border-box' }}>
+                                <img src={`${SUPABASE_URL}/storage/v1/object/public/images/${id}`} alt="post" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: isSelected ? 0.7 : 1 }} onError={(e) => e.target.style.display = 'none'} />
+                                {isSelected && <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: '24px' }}>✓</div>}
+                              </div>
+                            );
+                          })}
                         </div>
-                        <button onClick={() => downloadAllImages(post.image_ids.split(',').filter(Boolean))} style={{ width: '100%', padding: '8px', background: '#b8a88f', color: 'white', border: 'none', borderRadius: '8px', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer' }}>⬇️ 下載全部圖片</button>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                          <button onClick={() => downloadAllImages(post.image_ids.split(',').filter(Boolean))} style={{ width: '100%', padding: '8px', background: '#b8a88f', color: 'white', border: 'none', borderRadius: '8px', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer' }}>⬇️ 下載全部</button>
+                          {/iPad|iPhone|iPod/.test(navigator.userAgent) && (
+                            <button onClick={() => shareSelectedImages(post.id, post.image_ids.split(',').filter(Boolean))} style={{ width: '100%', padding: '8px', background: '#b8a88f', color: 'white', border: 'none', borderRadius: '8px', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer' }}>📱 分享到相簿</button>
+                          )}
+                        </div>
                       </div>
                     )}
                     {post.address && (
