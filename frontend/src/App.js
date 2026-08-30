@@ -145,15 +145,18 @@ function App() {
 
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
-    for (let i = 0; i < imageIds.length; i++) {
-      const imageId = imageIds[i];
-      setTimeout(async () => {
-        try {
-          const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/images/${imageId}`;
-
-          if (isIOS) {
-            window.open(imageUrl, '_blank');
-          } else {
+    if (isIOS) {
+      imageIds.forEach(imageId => {
+        const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/images/${imageId}`;
+        window.open(imageUrl, '_blank');
+      });
+      alert('圖片已打開，長按選擇「保存圖片」');
+    } else {
+      for (let i = 0; i < imageIds.length; i++) {
+        const imageId = imageIds[i];
+        const delay = Math.min(i * 100, 500);
+        setTimeout(async () => {
+          try {
             const { data, error } = await supabase.storage.from('images').download(imageId);
             if (error) throw error;
 
@@ -165,16 +168,11 @@ function App() {
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+          } catch (error) {
+            console.error('下載圖片失敗:', error);
           }
-        } catch (error) {
-          console.error('下載圖片失敗:', error);
-          alert(`圖片 ${i + 1} 下載失敗`);
-        }
-      }, i * 500);
-    }
-
-    if (isIOS) {
-      alert('圖片已在新視窗打開，長按圖片選擇「保存圖片」即可');
+        }, delay);
+      }
     }
   };
 
