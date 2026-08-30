@@ -313,6 +313,15 @@ function App() {
           <input type="text" value={searchAddress} onChange={(e) => setSearchAddress(e.target.value)} placeholder="輸入地址關鍵字搜尋..." style={{ width: '100%', padding: '12px 14px', border: '1.5px solid #e8e7e4', borderRadius: '10px', fontSize: '0.95rem', fontFamily: 'inherit', color: '#2c3e50', background: '#fafaf8' }} />
         </div>
 
+        {/iPad|iPhone|iPod/.test(navigator.userAgent) && (
+          <div style={{ marginBottom: '32px', padding: '14px', background: '#e8dcc8', borderRadius: '12px', border: '1px solid #d4c5b9' }}>
+            <div style={{ fontSize: '0.9rem', color: '#6b5544', lineHeight: '1.6' }}>
+              <strong>💡 iPhone 用戶提示：</strong><br/>
+              👆 點擊圖片勾選 → 點「📱 分享到相簿」→ 選「保存圖片」，圖片就會存入相簿！
+            </div>
+          </div>
+        )}
+
         <div style={{ display: 'flex', gap: '10px', marginBottom: '32px', justifyContent: 'center', flexWrap: 'wrap' }}>
           {['全部', '商用', '住用'].map((cat) => (
             <button key={cat} onClick={() => setCurrentFilter(cat)} style={{ padding: '10px 22px', border: '1.5px solid #e8e7e4', background: currentFilter === cat ? '#b8a88f' : 'white', color: currentFilter === cat ? 'white' : '#666', borderRadius: '20px', cursor: 'pointer', fontWeight: '600', fontSize: '0.9rem', transition: 'all 0.3s ease' }}>
