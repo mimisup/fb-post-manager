@@ -562,15 +562,13 @@ function App() {
                   </>
                 ) : (
                   <>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px', flexWrap: 'wrap' }}>
                       <span style={{ display: 'inline-block', padding: '6px 14px', borderRadius: '16px', fontSize: '0.8rem', fontWeight: '700', width: 'fit-content', background: post.category === '商用' ? '#e8dcc8' : '#d9e4d4', color: post.category === '商用' ? '#9d7d54' : '#5a7c5b', letterSpacing: '0.3px' }}>
                         {post.category}
                       </span>
-                      {post.posted_at && (
-                        <span style={{ fontSize: '0.8rem', color: '#888', fontWeight: '500' }}>
-                          ✓ 最後發文：{new Date(post.posted_at).toLocaleDateString('zh-TW')}
-                        </span>
-                      )}
+                      <button onClick={() => markAsPosted(post.id)} style={{ padding: '6px 12px', background: post.posted_at ? '#7fa87f' : '#f0ebe4', color: post.posted_at ? 'white' : '#888', border: 'none', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease', whiteSpace: 'nowrap' }}>
+                        {post.posted_at ? `✓ ${new Date(post.posted_at).toLocaleDateString('zh-TW')}` : '標記為已發'}
+                      </button>
                     </div>
                     {post.image_ids && post.image_ids.length > 0 && (
                       <div style={{ marginBottom: '16px' }}>
@@ -606,7 +604,6 @@ function App() {
                       {post.address && (
                         <button onClick={() => copyText(post.address)} style={{ padding: '10px 14px', background: '#b8a88f', color: 'white', border: 'none', borderRadius: '10px', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease' }}>📍 地址</button>
                       )}
-                      <button onClick={() => markAsPosted(post.id)} style={{ padding: '10px 14px', background: post.posted_at ? '#7fa87f' : '#d4c5b9', color: post.posted_at ? 'white' : '#6b5544', border: 'none', borderRadius: '10px', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease' }}>✅ {post.posted_at ? '已發' : '標記為已發'}</button>
                       <button onClick={() => startEdit(post)} style={{ padding: '10px 14px', background: '#d4c5b9', color: '#6b5544', border: 'none', borderRadius: '10px', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease' }}>✏️ 編輯</button>
                       <button onClick={() => deletePost(post.id)} style={{ padding: '10px 14px', background: '#f0ebe4', color: '#c1665a', border: 'none', borderRadius: '10px', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease', gridColumn: '1 / -1' }}>🗑️ 刪除</button>
                     </div>
