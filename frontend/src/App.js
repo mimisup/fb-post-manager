@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { createClient } from '@supabase/supabase-js';
 import './App.css';
 
-const API_BASE = '/api';
+const SUPABASE_URL = 'https://vqaetehnmsutaszzzdvz.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxYWV0ZWhubXN1dGFzenp6ZHZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgwNzE1NTgsImV4cCI6MjEwMzY0NzU1OH0.psuxi1DjezRX-tTjh4ZOrIsL07LelwM8qMrhJ9DJDyk';
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 function App() {
   const [posts, setPosts] = useState([]);
@@ -21,8 +23,9 @@ function App() {
 
   const loadPosts = async () => {
     try {
-      const res = await axios.get(`${API_BASE}/posts`);
-      setPosts(res.data.reverse());
+      const { data, error } = await supabase.from('posts').select('*').order('created_at', { ascending: false });
+      if (error) throw error;
+      setPosts(data || []);
     } catch (error) {
       console.error('Error loading posts:', error);
     }
@@ -59,26 +62,31 @@ function App() {
     try {
       let imageIds = [];
 
-      // Upload images first
       for (const file of selectedImages) {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('category', postCategory);
+        const fileName = `${Date.now()}-${file.name}`;
+        const { error: uploadError } = await supabase.storage.from('images').upload(fileName, file);
 
-        const imgRes = await axios.post(`${API_BASE}/images`, formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
-        imageIds.push(imgRes.data.id);
+        if (!uploadError) {
+          const { data: imgData } = await supabase.from('images').insert({
+            category: postCategory,
+            filename: file.name,
+            filepath: fileName
+          }).select();
+
+          if (imgData && imgData.length > 0) {
+            imageIds.push(imgData[0].id);
+          }
+        }
       }
 
-      // Then create post with image IDs
-      await axios.post(`${API_BASE}/posts`, {
+      const { error: postError } = await supabase.from('posts').insert({
         category: postCategory,
         address: postAddress,
         text: postContent,
-        image_ids: imageIds
+        image_ids: imageIds.join(',')
       });
 
+      if (postError) throw postError;
       loadPosts();
       resetForm();
     } catch (error) {
@@ -110,20 +118,19 @@ function App() {
     });
   };
 
-  const downloadImages = (images) => {
-    if (!images || images.length === 0) {
-      alert('此貼文無圖片');
-      return;
+  const getImageUrl = (filepath) => {
+    return `${SUPABASE_URL}/storage/v1/object/public/images/${filepath}`;
+  };
+
+  const deletePost = async (id) => {
+    if (!window.confirm('確認刪除此貼文？')) return;
+
+    try {
+      await supabase.from('posts').delete().eq('id', id);
+      loadPosts();
+    } catch (error) {
+      console.error('Error deleting post:', error);
     }
-
-    const imageIds = images.split(',').filter(Boolean);
-    if (imageIds.length === 0) return;
-
-    imageIds.forEach((id, index) => {
-      setTimeout(() => {
-        window.open(`${API_BASE.replace('/api', '')}/api/images/${id}`);
-      }, index * 500);
-    });
   };
 
   const startEdit = (post) => {
@@ -132,30 +139,19 @@ function App() {
       category: post.category,
       address: post.address || '',
       text: post.text || '',
-      image_ids: post.image_ids || []
+      image_ids: post.image_ids || ''
     });
   };
 
   const saveEdit = async () => {
     try {
-      await axios.put(`${API_BASE}/posts/${editingId}`, editData);
+      await supabase.from('posts').update(editData).eq('id', editingId);
       loadPosts();
       setEditingId(null);
       setEditData({});
     } catch (error) {
       console.error('Error updating post:', error);
       alert('編輯失敗');
-    }
-  };
-
-  const deletePost = async (id) => {
-    if (!window.confirm('確認刪除此貼文？')) return;
-
-    try {
-      await axios.delete(`${API_BASE}/posts/${id}`);
-      loadPosts();
-    } catch (error) {
-      console.error('Error deleting post:', error);
     }
   };
 
@@ -166,13 +162,11 @@ function App() {
   return (
     <div style={{ background: 'linear-gradient(135deg, #faf9f6 0%, #f8f9fa 100%)', minHeight: '100vh', padding: '40px 20px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", sans-serif', color: '#2c3e50' }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-        {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '50px' }}>
           <h1 style={{ fontSize: '2.5rem', fontWeight: '600', letterSpacing: '-0.5px', marginBottom: '12px', color: '#2c3e50' }}>FB 發文管理器</h1>
           <p style={{ fontSize: '0.95rem', color: '#888', fontWeight: '400' }}>輕鬆管理您的社群內容，一鍵複製與下載</p>
         </div>
 
-        {/* Form Section */}
         <div style={{ background: 'white', borderRadius: '16px', padding: '40px', marginBottom: '40px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.04)', border: '1px solid rgba(0, 0, 0, 0.02)' }}>
           <h2 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '28px', color: '#2c3e50' }}>建立新貼文</h2>
 
@@ -221,7 +215,6 @@ function App() {
           </div>
         </div>
 
-        {/* Filter Tabs */}
         <div style={{ display: 'flex', gap: '10px', marginBottom: '32px', justifyContent: 'center', flexWrap: 'wrap' }}>
           {['全部', '商用', '住用'].map((cat, i) => (
             <button key={cat} onClick={(e) => filterPosts(cat, e.target)} className="filter-btn" style={{ padding: '10px 22px', border: '1.5px solid #e8e7e4', background: i === 0 ? '#b8a88f' : 'white', color: i === 0 ? 'white' : '#666', borderRadius: '20px', cursor: 'pointer', fontWeight: '600', fontSize: '0.9rem', transition: 'all 0.3s ease' }}>
@@ -230,7 +223,6 @@ function App() {
           ))}
         </div>
 
-        {/* Posts Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '24px' }}>
           {filteredPosts.length === 0 ? (
             <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px 20px', color: '#999' }}>
@@ -276,8 +268,10 @@ function App() {
                     </div>
                     {post.image_ids && post.image_ids.length > 0 && (
                       <div style={{ marginBottom: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: '8px' }}>
-                        {post.image_ids.map(imgId => (
-                          <img key={imgId} src={`${API_BASE}/images/${imgId}`} alt="" style={{ width: '100%', height: '70px', objectFit: 'cover', borderRadius: '8px', cursor: 'pointer' }} onClick={() => window.open(`${API_BASE}/images/${imgId}`)} />
+                        {post.image_ids.split(',').filter(Boolean).map(id => (
+                          <div key={id} style={{ width: '100%', height: '70px', backgroundColor: '#f0f0f0', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', color: '#999' }}>
+                            📷
+                          </div>
                         ))}
                       </div>
                     )}
