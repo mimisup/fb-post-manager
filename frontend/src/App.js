@@ -118,6 +118,26 @@ function App() {
     });
   };
 
+  const downloadAllImages = async (imageIds) => {
+    if (!imageIds || imageIds.length === 0) {
+      alert('此貼文無圖片');
+      return;
+    }
+
+    for (let i = 0; i < imageIds.length; i++) {
+      const imageId = imageIds[i];
+      setTimeout(() => {
+        const url = `${SUPABASE_URL}/storage/v1/object/public/images/${imageId}`;
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `image-${imageId}.jpg`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }, i * 500);
+    }
+  };
+
   const deletePost = async (id) => {
     if (!window.confirm('確認刪除此貼文？')) return;
 
@@ -263,12 +283,15 @@ function App() {
                       {post.text}
                     </div>
                     {post.image_ids && post.image_ids.length > 0 && (
-                      <div style={{ marginBottom: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: '8px' }}>
-                        {post.image_ids.split(',').filter(Boolean).map(id => (
-                          <div key={id} style={{ width: '100%', height: '70px', backgroundColor: '#f0f0f0', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', color: '#999' }}>
-                            📷
-                          </div>
-                        ))}
+                      <div style={{ marginBottom: '16px' }}>
+                        <div style={{ marginBottom: '8px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: '8px' }}>
+                          {post.image_ids.split(',').filter(Boolean).map(id => (
+                            <div key={id} style={{ width: '100%', height: '70px', backgroundColor: '#f0f0f0', borderRadius: '8px', overflow: 'hidden', cursor: 'pointer' }}>
+                              <img src={`${SUPABASE_URL}/storage/v1/object/public/images/${id}`} alt="post" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => e.target.style.display = 'none'} />
+                            </div>
+                          ))}
+                        </div>
+                        <button onClick={() => downloadAllImages(post.image_ids.split(',').filter(Boolean))} style={{ width: '100%', padding: '8px', background: '#b8a88f', color: 'white', border: 'none', borderRadius: '8px', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer' }}>⬇️ 下載全部圖片</button>
                       </div>
                     )}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: 'auto' }}>
