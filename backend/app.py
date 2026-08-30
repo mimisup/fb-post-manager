@@ -8,13 +8,20 @@ app = Flask(__name__, static_folder='../frontend/build', static_url_path='')
 CORS(app, resources={r"/api/*": {"origins": "*", "methods": ["GET", "POST", "DELETE", "OPTIONS"], "allow_headers": ["Content-Type"]}})
 
 # Database config
-DATABASE_URL = os.environ.get('DATABASE_URL', 'sqlite:///fb_posts.db')
-if DATABASE_URL.startswith('postgres://'):
-    DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
+DATABASE_URL = os.environ.get('DATABASE_URL')
 
-app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+if DATABASE_URL:
+    if DATABASE_URL.startswith('postgres://'):
+        DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+else:
+    # Use SQLite as fallback
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///fb_posts.db'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+
+print(f"📊 Database: {app.config['SQLALCHEMY_DATABASE_URI']}")
 
 # Models
 class CopyText(db.Model):
