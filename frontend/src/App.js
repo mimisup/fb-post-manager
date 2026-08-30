@@ -17,9 +17,16 @@ function App() {
   const [editingId, setEditingId] = useState(null);
   const [editData, setEditData] = useState({});
   const [searchAddress, setSearchAddress] = useState('');
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
     loadPosts();
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const loadPosts = async () => {
@@ -191,15 +198,15 @@ function App() {
   return (
     <div style={{ background: 'linear-gradient(135deg, #faf9f6 0%, #f8f9fa 100%)', minHeight: '100vh', padding: '40px 20px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", sans-serif', color: '#2c3e50' }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: '50px' }}>
-          <h1 style={{ fontSize: '2.5rem', fontWeight: '600', letterSpacing: '-0.5px', marginBottom: '12px', color: '#2c3e50' }}>FB 發文管理器</h1>
-          <p style={{ fontSize: '0.95rem', color: '#888', fontWeight: '400' }}>輕鬆管理您的社群內容，一鍵複製與下載</p>
+        <div style={{ textAlign: 'center', marginBottom: isMobile ? '24px' : '50px' }}>
+          <h1 style={{ fontSize: isMobile ? '1.8rem' : '2.5rem', fontWeight: '600', letterSpacing: '-0.5px', marginBottom: '8px', color: '#2c3e50' }}>FB 發文管理器</h1>
+          <p style={{ fontSize: isMobile ? '0.8rem' : '0.95rem', color: '#888', fontWeight: '400' }}>輕鬆管理您的社群內容，一鍵複製與下載</p>
         </div>
 
-        <div style={{ background: 'white', borderRadius: '16px', padding: '40px', marginBottom: '40px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.04)', border: '1px solid rgba(0, 0, 0, 0.02)' }}>
-          <h2 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '28px', color: '#2c3e50' }}>建立新貼文</h2>
+        <div style={{ background: 'white', borderRadius: '16px', padding: isMobile ? '20px' : '40px', marginBottom: '40px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.04)', border: '1px solid rgba(0, 0, 0, 0.02)' }}>
+          <h2 style={{ fontSize: isMobile ? '1.1rem' : '1.3rem', fontWeight: '600', marginBottom: isMobile ? '16px' : '28px', color: '#2c3e50' }}>建立新貼文</h2>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '24px', marginBottom: '24px' }}>
             <div>
               <label style={{ display: 'block', fontWeight: '600', fontSize: '0.95rem', marginBottom: '10px', color: '#2c3e50', letterSpacing: '0.2px' }}>分類</label>
               <select value={postCategory} onChange={(e) => setPostCategory(e.target.value)} style={{ width: '100%', padding: '12px 14px', border: '1.5px solid #e8e7e4', borderRadius: '10px', fontSize: '0.95rem', fontFamily: 'inherit', color: '#2c3e50', background: '#fafaf8', transition: 'all 0.3s ease', cursor: 'pointer', height: '44px', display: 'flex', alignItems: 'center' }}>
