@@ -7,22 +7,10 @@ import os
 app = Flask(__name__, static_folder='../frontend/build', static_url_path='')
 CORS(app, resources={r"/api/*": {"origins": "*", "methods": ["GET", "POST", "DELETE", "OPTIONS"], "allow_headers": ["Content-Type"]}})
 
-# Database config
-DATABASE_URL = os.environ.get('DATABASE_URL')
-
-if DATABASE_URL:
-    if DATABASE_URL.startswith('postgres://'):
-        DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
-    DATABASE_URL = DATABASE_URL + '?sslmode=require'
-    app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
-else:
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///fb_posts.db'
-
+# Database config - Use SQLite for simplicity and reliability
+db_path = '/tmp/fb_posts.db' if os.path.exists('/tmp') else 'fb_posts.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-    'pool_pre_ping': True,
-    'pool_recycle': 3600
-}
 
 db = SQLAlchemy(app)
 
