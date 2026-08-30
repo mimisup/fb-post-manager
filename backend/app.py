@@ -179,6 +179,25 @@ def create_post():
     db.session.commit()
     return jsonify(post.to_dict()), 201
 
+@app.route('/api/posts/<int:id>', methods=['PUT'])
+def update_post(id):
+    post = Post.query.get(id)
+    if not post:
+        return jsonify({'error': 'Not found'}), 404
+
+    data = request.json
+    if 'category' in data:
+        post.category = data['category']
+    if 'address' in data:
+        post.address = data['address']
+    if 'text' in data:
+        post.text = data['text']
+    if 'image_ids' in data:
+        post.image_ids = ','.join(data['image_ids']) if data['image_ids'] else ''
+
+    db.session.commit()
+    return jsonify(post.to_dict()), 200
+
 @app.route('/api/posts/<int:id>', methods=['DELETE'])
 def delete_post(id):
     post = Post.query.get(id)

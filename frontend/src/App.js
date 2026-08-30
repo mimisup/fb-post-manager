@@ -12,6 +12,8 @@ function App() {
   const [postContent, setPostContent] = useState('');
   const [selectedImages, setSelectedImages] = useState([]);
   const [imagePreview, setImagePreview] = useState([]);
+  const [editingId, setEditingId] = useState(null);
+  const [editData, setEditData] = useState({});
 
   useEffect(() => {
     loadPosts();
@@ -124,6 +126,28 @@ function App() {
     });
   };
 
+  const startEdit = (post) => {
+    setEditingId(post.id);
+    setEditData({
+      category: post.category,
+      address: post.address || '',
+      text: post.text || '',
+      image_ids: post.image_ids || []
+    });
+  };
+
+  const saveEdit = async () => {
+    try {
+      await axios.put(`${API_BASE}/posts/${editingId}`, editData);
+      loadPosts();
+      setEditingId(null);
+      setEditData({});
+    } catch (error) {
+      console.error('Error updating post:', error);
+      alert('編輯失敗');
+    }
+  };
+
   const deletePost = async (id) => {
     if (!window.confirm('確認刪除此貼文？')) return;
 
@@ -215,28 +239,55 @@ function App() {
           ) : (
             filteredPosts.map(post => (
               <div key={post.id} style={{ background: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.04)', border: '1px solid rgba(0, 0, 0, 0.02)', display: 'flex', flexDirection: 'column', transition: 'all 0.3s ease' }}>
-                <span style={{ display: 'inline-block', padding: '6px 14px', borderRadius: '16px', fontSize: '0.8rem', fontWeight: '700', marginBottom: '16px', width: 'fit-content', background: post.category === '商用' ? '#e8dcc8' : '#d9e4d4', color: post.category === '商用' ? '#9d7d54' : '#5a7c5b', letterSpacing: '0.3px' }}>
-                  {post.category}
-                </span>
-                {post.address && (
-                  <div style={{ color: post.category === '商用' ? '#9d7d54' : '#5a7c5b', fontSize: '0.9rem', marginBottom: '12px', padding: '8px 12px', background: post.category === '商用' ? '#e8dcc8' : '#d9e4d4', borderRadius: '8px', borderLeft: `3px solid ${post.category === '商用' ? '#b8a88f' : '#7fa87f'}` }}>
-                    📍 {post.address}
-                  </div>
+                {editingId === post.id ? (
+                  <>
+                    <div style={{ marginBottom: '16px' }}>
+                      <label style={{ display: 'block', fontWeight: '600', fontSize: '0.9rem', marginBottom: '8px', color: '#2c3e50' }}>分類</label>
+                      <select value={editData.category} onChange={(e) => setEditData({...editData, category: e.target.value})} style={{ width: '100%', padding: '8px 12px', border: '1.5px solid #e8e7e4', borderRadius: '8px', fontSize: '0.9rem' }}>
+                        <option value="商用">商用</option>
+                        <option value="住用">住用</option>
+                      </select>
+                    </div>
+                    <div style={{ marginBottom: '16px' }}>
+                      <label style={{ display: 'block', fontWeight: '600', fontSize: '0.9rem', marginBottom: '8px', color: '#2c3e50' }}>地址</label>
+                      <input type="text" value={editData.address} onChange={(e) => setEditData({...editData, address: e.target.value})} style={{ width: '100%', padding: '8px 12px', border: '1.5px solid #e8e7e4', borderRadius: '8px', fontSize: '0.9rem' }} />
+                    </div>
+                    <div style={{ marginBottom: '16px' }}>
+                      <label style={{ display: 'block', fontWeight: '600', fontSize: '0.9rem', marginBottom: '8px', color: '#2c3e50' }}>文案</label>
+                      <textarea value={editData.text} onChange={(e) => setEditData({...editData, text: e.target.value})} style={{ width: '100%', padding: '8px 12px', border: '1.5px solid #e8e7e4', borderRadius: '8px', fontSize: '0.9rem', minHeight: '80px', resize: 'vertical' }} />
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: 'auto' }}>
+                      <button onClick={saveEdit} style={{ padding: '10px 14px', background: '#b8a88f', color: 'white', border: 'none', borderRadius: '10px', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer' }}>💾 保存</button>
+                      <button onClick={() => setEditingId(null)} style={{ padding: '10px 14px', background: '#e8e7e4', color: '#666', border: 'none', borderRadius: '10px', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer' }}>✕ 取消</button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <span style={{ display: 'inline-block', padding: '6px 14px', borderRadius: '16px', fontSize: '0.8rem', fontWeight: '700', marginBottom: '16px', width: 'fit-content', background: post.category === '商用' ? '#e8dcc8' : '#d9e4d4', color: post.category === '商用' ? '#9d7d54' : '#5a7c5b', letterSpacing: '0.3px' }}>
+                      {post.category}
+                    </span>
+                    {post.address && (
+                      <div style={{ color: post.category === '商用' ? '#9d7d54' : '#5a7c5b', fontSize: '0.9rem', marginBottom: '12px', padding: '8px 12px', background: post.category === '商用' ? '#e8dcc8' : '#d9e4d4', borderRadius: '8px', borderLeft: `3px solid ${post.category === '商用' ? '#b8a88f' : '#7fa87f'}` }}>
+                        📍 {post.address}
+                      </div>
+                    )}
+                    <div style={{ color: '#2c3e50', fontSize: '0.95rem', lineHeight: '1.6', marginBottom: '16px', maxHeight: '120px', overflowY: 'auto', padding: '12px', background: '#fafaf8', borderRadius: '10px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                      {post.text}
+                    </div>
+                    {post.image_ids && post.image_ids.length > 0 && (
+                      <div style={{ marginBottom: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: '8px' }}>
+                        {post.image_ids.map(imgId => (
+                          <img key={imgId} src={`${API_BASE}/images/${imgId}`} alt="" style={{ width: '100%', height: '70px', objectFit: 'cover', borderRadius: '8px', cursor: 'pointer' }} onClick={() => window.open(`${API_BASE}/images/${imgId}`)} />
+                        ))}
+                      </div>
+                    )}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: 'auto' }}>
+                      <button onClick={() => copyText(post.text)} style={{ padding: '10px 14px', background: '#b8a88f', color: 'white', border: 'none', borderRadius: '10px', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease' }}>📋 複製文案</button>
+                      <button onClick={() => startEdit(post)} style={{ padding: '10px 14px', background: '#d4c5b9', color: '#6b5544', border: 'none', borderRadius: '10px', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease' }}>✏️ 編輯</button>
+                      <button onClick={() => deletePost(post.id)} style={{ padding: '10px 14px', background: '#f0ebe4', color: '#c1665a', border: 'none', borderRadius: '10px', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease', gridColumn: '1 / -1' }}>🗑️ 刪除</button>
+                    </div>
+                  </>
                 )}
-                <div style={{ color: '#2c3e50', fontSize: '0.95rem', lineHeight: '1.6', marginBottom: '16px', maxHeight: '120px', overflowY: 'auto', padding: '12px', background: '#fafaf8', borderRadius: '10px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                  {post.text}
-                </div>
-                {post.image_ids && post.image_ids.length > 0 && (
-                  <div style={{ marginBottom: '16px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: '8px' }}>
-                    {post.image_ids.map(imgId => (
-                      <img key={imgId} src={`${API_BASE}/images/${imgId}`} alt="" style={{ width: '100%', height: '70px', objectFit: 'cover', borderRadius: '8px', cursor: 'pointer' }} onClick={() => window.open(`${API_BASE}/images/${imgId}`)} />
-                    ))}
-                  </div>
-                )}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: 'auto' }}>
-                  <button onClick={() => copyText(post.text)} style={{ padding: '10px 14px', background: '#b8a88f', color: 'white', border: 'none', borderRadius: '10px', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease' }}>📋 複製文案</button>
-                  <button onClick={() => deletePost(post.id)} style={{ padding: '10px 14px', background: '#f0ebe4', color: '#c1665a', border: 'none', borderRadius: '10px', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease', gridColumn: '1 / -1' }}>🗑️ 刪除</button>
-                </div>
               </div>
             ))
           )}
