@@ -109,8 +109,11 @@ function App() {
         }
       }
 
+      // 始終顯示上傳結果
       if (failedCount > 0) {
-        alert(`⚠️ 只成功上傳 ${imageIds.length}/${selectedImages.length} 張圖片 (${failedCount} 張失敗，已跳過)`);
+        alert(`⚠️ 上傳結果：成功 ${imageIds.length} 張，失敗 ${failedCount} 張`);
+      } else if (selectedImages.length > 0) {
+        alert(`✅ 已上傳 ${imageIds.length} 張圖片`);
       }
 
       const { error: postError } = await supabase.from('posts').insert({
@@ -121,6 +124,7 @@ function App() {
       });
 
       if (postError) throw postError;
+      alert('✅ 貼文已儲存');
       loadPosts();
       resetForm();
     } catch (error) {
