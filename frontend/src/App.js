@@ -74,15 +74,17 @@ function App() {
 
     try {
       let imageIds = [];
+      let failedCount = 0;
 
-      for (const file of selectedImages) {
+      for (let i = 0; i < selectedImages.length; i++) {
+        const file = selectedImages[i];
         try {
-          const timestamp = Date.now();
+          const timestamp = Date.now() + i;
           const randomStr = Math.random().toString(36).substring(7);
           const ext = file.name.split('.').pop() || 'jpg';
           const fileName = `${timestamp}-${randomStr}.${ext}`;
 
-          console.log('Uploading:', fileName);
+          console.log(`上傳 ${i + 1}/${selectedImages.length}:`, fileName);
           const { data: uploadData, error: uploadError } = await supabase.storage
             .from('images')
             .upload(fileName, file, { upsert: false });
@@ -98,15 +100,17 @@ function App() {
               imageIds.push(uploadData.path);
             }
           } else {
-            console.error('Upload error:', uploadError);
-            alert(`圖片上傳失敗: ${uploadError?.message || '未知錯誤'}`);
-            throw uploadError;
+            console.error(`圖片 ${i + 1} 上傳失敗:`, uploadError);
+            failedCount++;
           }
         } catch (err) {
-          console.error('File upload exception:', err);
-          alert(`上傳異常: ${err?.message || '未知錯誤'}`);
-          throw err;
+          console.error(`圖片 ${i + 1} 上傳異常:`, err);
+          failedCount++;
         }
+      }
+
+      if (failedCount > 0) {
+        alert(`⚠️ 只成功上傳 ${imageIds.length}/${selectedImages.length} 張圖片 (${failedCount} 張失敗，已跳過)`);
       }
 
       const { error: postError } = await supabase.from('posts').insert({
