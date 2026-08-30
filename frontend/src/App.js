@@ -5,308 +5,232 @@ import './App.css';
 const API_BASE = 'http://localhost:5000/api';
 
 function App() {
-  const [category, setCategory] = useState('商用');
-  const [tab, setTab] = useState('copytext'); // copytext, images, posts
-
-  const [copyTexts, setCopyTexts] = useState([]);
-  const [images, setImages] = useState([]);
   const [posts, setPosts] = useState([]);
-
-  const [newText, setNewText] = useState('');
-  const [selectedImages, setSelectedImages] = useState([]);
-  const [postText, setPostText] = useState('');
+  const [currentFilter, setCurrentFilter] = useState('全區');
+  const [postCategory, setPostCategory] = useState('商用');
+  const [postContent, setPostContent] = useState('');
+  const [postImages, setPostImages] = useState([]);
 
   useEffect(() => {
-    loadData();
-  }, [category]);
+    loadPosts();
+  }, []);
 
-  const loadData = async () => {
+  const loadPosts = async () => {
     try {
-      const [textRes, imgRes, postRes] = await Promise.all([
-        axios.get(`${API_BASE}/copy-texts?category=${category}`),
-        axios.get(`${API_BASE}/images?category=${category}`),
-        axios.get(`${API_BASE}/posts?category=${category}`)
-      ]);
-      setCopyTexts(textRes.data);
-      setImages(imgRes.data);
-      setPosts(postRes.data);
+      const res = await axios.get(`${API_BASE}/posts`);
+      const postsWithImages = await Promise.all(res.data.map(async (post) => {
+        const imagePromises = post.image_ids.map(id =>
+          axios.get(`${API_BASE}/images`).then(res => {
+            const img = res.data.find(i => i.id === id);
+            return img ? { name: img.filename, url: `../${img.filepath}` } : null;
+          }).catch(() => null)
+        );
+        const images = await Promise.all(imagePromises);
+        return { ...post, images: images.filter(Boolean) };
+      }));
+      setPosts(postsWithImages);
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error('Error loading posts:', error);
     }
   };
 
-  // Copy Text Functions
-  const addCopyText = async () => {
-    if (!newText.trim()) return;
-    try {
-      await axios.post(`${API_BASE}/copy-texts`, {
-        category,
-        text: newText
-      });
-      setNewText('');
-      loadData();
-    } catch (error) {
-      console.error('Error adding text:', error);
-    }
-  };
-
-  const deleteCopyText = async (id) => {
-    try {
-      await axios.delete(`${API_BASE}/copy-texts/${id}`);
-      loadData();
-    } catch (error) {
-      console.error('Error deleting text:', error);
-    }
-  };
-
-  const copyCopyText = (text) => {
-    navigator.clipboard.writeText(text);
-    alert('已複製到剪貼簿！');
-  };
-
-  // Image Functions
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('category', category);
-
-    try {
-      await axios.post(`${API_BASE}/images`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      loadData();
-    } catch (error) {
-      console.error('Error uploading image:', error);
-    }
-  };
-
-  const deleteImage = async (id) => {
-    try {
-      await axios.delete(`${API_BASE}/images/${id}`);
-      loadData();
-    } catch (error) {
-      console.error('Error deleting image:', error);
-    }
-  };
-
-  const toggleImageSelection = (id) => {
-    setSelectedImages(prev =>
-      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
-    );
-  };
-
-  // Post Functions
-  const createPost = async () => {
-    if (!postText.trim() && selectedImages.length === 0) {
-      alert('請輸入文案或選擇圖片');
+  const addPost = async () => {
+    if (!postContent.trim() && postImages.length === 0) {
+      alert('請輸入文案或選擇圖片！');
       return;
     }
 
     try {
+      const imageDataArray = [];
+      for (const file of postImages) {
+        const reader = new FileReader();
+        await new Promise((resolve) => {
+          reader.onload = (e) => {
+            imageDataArray.push({ name: file.name, url: e.target.result });
+            resolve();
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      const newPost = {
+        id: Date.now(),
+        category: postCategory,
+        content: postContent,
+        images: imageDataArray
+      };
+
       await axios.post(`${API_BASE}/posts`, {
-        category,
-        text: postText,
-        image_ids: selectedImages
+        category: postCategory,
+        text: postContent,
+        image_ids: []
       });
-      setPostText('');
-      setSelectedImages([]);
-      loadData();
+
+      setPosts([newPost, ...posts]);
+      setPostContent('');
+      setPostImages([]);
     } catch (error) {
-      console.error('Error creating post:', error);
+      console.error('Error adding post:', error);
     }
   };
 
-  const deletePost = async (id) => {
+  const copyText = (text) => {
+    navigator.clipboard.writeText(text).then(() => {
+      alert('文案已複製到剪貼簿！');
+    }).catch(() => {
+      alert('複製失敗，請手動複製');
+    });
+  };
+
+  const downloadImages = (images, postId) => {
+    if (!images || images.length === 0) {
+      alert('此貼文無圖片');
+      return;
+    }
+
+    images.forEach((img, index) => {
+      setTimeout(() => {
+        const a = document.createElement('a');
+        a.href = img.url;
+        a.download = img.name || `post-${postId}-image-${index + 1}.jpg`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }, index * 300);
+    });
+  };
+
+  const deletePost = async (postId) => {
     try {
-      await axios.delete(`${API_BASE}/posts/${id}`);
-      loadData();
+      await axios.delete(`${API_BASE}/posts/${postId}`);
+      setPosts(posts.filter(p => p.id !== postId));
     } catch (error) {
       console.error('Error deleting post:', error);
     }
   };
 
-  const copyPost = (post) => {
-    let content = post.text || '';
-    navigator.clipboard.writeText(content);
-    alert('帖子已複製到剪貼簿！');
+  const filterPosts = (category) => {
+    setCurrentFilter(category);
   };
 
-  return (
-    <div className="app">
-      <header className="header">
-        <h1>FB 發文管理器</h1>
-        <div className="category-buttons">
-          <button
-            className={`btn-category ${category === '商用' ? 'active' : ''}`}
-            onClick={() => setCategory('商用')}
-          >
-            商用
-          </button>
-          <button
-            className={`btn-category ${category === '住用' ? 'active' : ''}`}
-            onClick={() => setCategory('住用')}
-          >
-            住用
-          </button>
-        </div>
-      </header>
+  const filteredPosts = currentFilter === '全區'
+    ? posts
+    : posts.filter(p => p.category === currentFilter);
 
-      <div className="tabs">
+  return (
+    <div style={{ backgroundColor: '#f4f6f8', padding: '20px', maxWidth: '1000px', margin: '0 auto' }}>
+      <h1 style={{ color: '#1877f2', textAlign: 'center' }}>FB 發文管理器</h1>
+
+      {/* 新增貼文表單 */}
+      <div style={{ background: '#fff', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', marginBottom: '25px' }}>
+        <div style={{ marginBottom: '15px' }}>
+          <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>選擇分類</label>
+          <select
+            value={postCategory}
+            onChange={(e) => setPostCategory(e.target.value)}
+            style={{ width: '100%', padding: '10px', border: '1px solid #ccc', borderRadius: '5px' }}
+          >
+            <option value="商用">商用</option>
+            <option value="住用">住用</option>
+          </select>
+        </div>
+
+        <div style={{ marginBottom: '15px' }}>
+          <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>貼文文案</label>
+          <textarea
+            value={postContent}
+            onChange={(e) => setPostContent(e.target.value)}
+            placeholder="輸入要預設的文案..."
+            style={{ width: '100%', padding: '10px', border: '1px solid #ccc', borderRadius: '5px', height: '100px', resize: 'vertical' }}
+          />
+        </div>
+
+        <div style={{ marginBottom: '15px' }}>
+          <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>上傳圖片（可多選）</label>
+          <input
+            type="file"
+            multiple
+            accept="image/*"
+            onChange={(e) => setPostImages(Array.from(e.target.files))}
+            style={{ width: '100%', padding: '10px', border: '1px solid #ccc', borderRadius: '5px' }}
+          />
+        </div>
+
         <button
-          className={`tab ${tab === 'copytext' ? 'active' : ''}`}
-          onClick={() => setTab('copytext')}
+          onClick={addPost}
+          style={{ backgroundColor: '#1877f2', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '5px', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold', width: '100%' }}
         >
-          📝 文案庫
-        </button>
-        <button
-          className={`tab ${tab === 'images' ? 'active' : ''}`}
-          onClick={() => setTab('images')}
-        >
-          🖼️ 圖片庫
-        </button>
-        <button
-          className={`tab ${tab === 'posts' ? 'active' : ''}`}
-          onClick={() => setTab('posts')}
-        >
-          📋 帖子
+          儲存貼文庫
         </button>
       </div>
 
-      <div className="content">
-        {/* Copy Text Tab */}
-        {tab === 'copytext' && (
-          <div className="section">
-            <h2>文案庫 - {category}</h2>
-            <div className="input-group">
-              <textarea
-                placeholder="輸入文案..."
-                value={newText}
-                onChange={(e) => setNewText(e.target.value)}
-                rows="4"
-              />
-              <button onClick={addCopyText} className="btn-primary">
-                新增文案
-              </button>
-            </div>
+      {/* 分類篩選 */}
+      <div style={{ marginBottom: '20px', display: 'flex', gap: '10px' }}>
+        {['全區', '商用', '住用'].map(cat => (
+          <button
+            key={cat}
+            onClick={() => filterPosts(cat)}
+            style={{
+              padding: '8px 16px',
+              border: 'none',
+              background: currentFilter === cat ? '#1877f2' : '#e4e6eb',
+              color: currentFilter === cat ? 'white' : 'black',
+              borderRadius: '20px',
+              cursor: 'pointer',
+              fontWeight: 'bold'
+            }}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
 
-            <div className="text-list">
-              {copyTexts.map(text => (
-                <div key={text.id} className="text-item">
-                  <p>{text.text}</p>
-                  <div className="actions">
-                    <button
-                      className="btn-small"
-                      onClick={() => copyCopyText(text.text)}
-                    >
-                      📋 複製
-                    </button>
-                    <button
-                      className="btn-small btn-danger"
-                      onClick={() => deleteCopyText(text.id)}
-                    >
-                      🗑️ 刪除
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Images Tab */}
-        {tab === 'images' && (
-          <div className="section">
-            <h2>圖片庫 - {category}</h2>
-            <div className="upload-group">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-              />
-            </div>
-
-            <div className="image-grid">
-              {images.map(img => (
-                <div key={img.id} className="image-item">
-                  <img src={`../${img.filepath}`} alt={img.filename} />
-                  <p>{img.filename}</p>
-                  <button
-                    className="btn-small btn-danger"
-                    onClick={() => deleteImage(img.id)}
-                  >
-                    🗑️ 刪除
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Posts Tab */}
-        {tab === 'posts' && (
-          <div className="section">
-            <h2>發文助手 - {category}</h2>
-
-            <div className="post-creator">
-              <h3>建立新帖子</h3>
-              <textarea
-                placeholder="輸入文案..."
-                value={postText}
-                onChange={(e) => setPostText(e.target.value)}
-                rows="5"
-              />
-
-              <h4>選擇圖片</h4>
-              <div className="image-select-grid">
-                {images.map(img => (
-                  <div
-                    key={img.id}
-                    className={`image-select ${selectedImages.includes(img.id) ? 'selected' : ''}`}
-                    onClick={() => toggleImageSelection(img.id)}
-                  >
-                    <img src={`../${img.filepath}`} alt={img.filename} />
-                    <div className="checkbox">
-                      {selectedImages.includes(img.id) && '✓'}
-                    </div>
-                  </div>
+      {/* 貼文列表 */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
+        {filteredPosts.map(post => (
+          <div
+            key={post.id}
+            style={{ background: 'white', borderRadius: '8px', padding: '15px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
+          >
+            <div>
+              <span style={{
+                display: 'inline-block',
+                padding: '3px 8px',
+                borderRadius: '4px',
+                fontSize: '12px',
+                fontWeight: 'bold',
+                marginBottom: '10px',
+                background: post.category === '商用' ? '#e7f3ff' : '#eef7ee',
+                color: post.category === '商用' ? '#1877f2' : '#2e7d32'
+              }}>
+                {post.category}
+              </span>
+              <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all', marginBottom: '15px', maxHeight: '120px', overflowY: 'auto', background: '#f9f9f9', padding: '8px', borderRadius: '4px' }}>
+                {post.content}
+              </div>
+              <div style={{ display: 'flex', gap: '5px', overflowX: 'auto', marginBottom: '15px' }}>
+                {post.images && post.images.map((img, idx) => (
+                  <img key={idx} src={img.url} alt={img.name} style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px' }} />
                 ))}
               </div>
+            </div>
 
-              <button onClick={createPost} className="btn-primary">
-                建立帖子
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                onClick={() => copyText(post.content)}
+                style={{ flex: 1, padding: '8px', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px', background: '#42b72a', color: 'white' }}
+              >
+                複製文案
+              </button>
+              <button
+                onClick={() => downloadImages(post.images, post.id)}
+                style={{ flex: 1, padding: '8px', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px', background: '#1877f2', color: 'white' }}
+              >
+                下載圖片 ({post.images ? post.images.length : 0})
               </button>
             </div>
-
-            <div className="posts-list">
-              <h3>已建立的帖子</h3>
-              {posts.map(post => (
-                <div key={post.id} className="post-item">
-                  <p className="post-text">{post.text}</p>
-                  {post.image_ids.length > 0 && (
-                    <p className="post-images">📸 {post.image_ids.length} 張圖片</p>
-                  )}
-                  <div className="actions">
-                    <button
-                      className="btn-small"
-                      onClick={() => copyPost(post)}
-                    >
-                      📋 複製
-                    </button>
-                    <button
-                      className="btn-small btn-danger"
-                      onClick={() => deletePost(post.id)}
-                    >
-                      🗑️ 刪除
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
-        )}
+        ))}
       </div>
     </div>
   );
