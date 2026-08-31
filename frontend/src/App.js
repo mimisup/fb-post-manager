@@ -578,20 +578,17 @@ function App() {
           </div>
         </div>
 
-        <div style={{ marginBottom: '24px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-          <div>
-            <label style={{ display: 'block', fontWeight: '600', fontSize: '0.95rem', marginBottom: '10px', color: '#2c3e50', letterSpacing: '0.2px' }}>查詢地址</label>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <input type="text" value={searchAddress} onChange={(e) => setSearchAddress(e.target.value)} placeholder="輸入地址搜尋..." style={{ flex: 1, padding: '12px 14px', border: '1.5px solid #e8e7e4', borderRadius: '10px', fontSize: '0.95rem', fontFamily: 'inherit', color: '#2c3e50', background: '#fafaf8' }} />
-              <button onClick={() => setSearchAddress('')} style={{ padding: '12px 20px', background: '#e8e7e4', color: '#666', border: 'none', borderRadius: '10px', fontSize: '0.9rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease', whiteSpace: 'nowrap' }}>清除</button>
-            </div>
+        <div style={{ marginBottom: '24px' }}>
+          <label style={{ display: 'block', fontWeight: '600', fontSize: '0.95rem', marginBottom: '10px', color: '#2c3e50', letterSpacing: '0.2px' }}>查詢地址</label>
+          <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
+            <input type="text" value={searchAddress} onChange={(e) => setSearchAddress(e.target.value)} placeholder="輸入地址搜尋..." style={{ flex: 1, padding: '12px 14px', border: '1.5px solid #e8e7e4', borderRadius: '10px', fontSize: '0.95rem', fontFamily: 'inherit', color: '#2c3e50', background: '#fafaf8' }} />
+            <button onClick={() => setSearchAddress('')} style={{ padding: '12px 20px', background: '#e8e7e4', color: '#666', border: 'none', borderRadius: '10px', fontSize: '0.9rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease', whiteSpace: 'nowrap' }}>清除</button>
           </div>
-          <div>
-            <label style={{ display: 'block', fontWeight: '600', fontSize: '0.95rem', marginBottom: '10px', color: '#2c3e50', letterSpacing: '0.2px' }}>查詢文案</label>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <input type="text" value={searchText} onChange={(e) => setSearchText(e.target.value)} placeholder="輸入文案搜尋..." style={{ flex: 1, padding: '12px 14px', border: '1.5px solid #e8e7e4', borderRadius: '10px', fontSize: '0.95rem', fontFamily: 'inherit', color: '#2c3e50', background: '#fafaf8' }} />
-              <button onClick={() => setSearchText('')} style={{ padding: '12px 20px', background: '#e8e7e4', color: '#666', border: 'none', borderRadius: '10px', fontSize: '0.9rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease', whiteSpace: 'nowrap' }}>清除</button>
-            </div>
+
+          <label style={{ display: 'block', fontWeight: '600', fontSize: '0.95rem', marginBottom: '10px', color: '#2c3e50', letterSpacing: '0.2px' }}>查詢文案</label>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <input type="text" value={searchText} onChange={(e) => setSearchText(e.target.value)} placeholder="輸入文案搜尋..." style={{ flex: 1, padding: '12px 14px', border: '1.5px solid #e8e7e4', borderRadius: '10px', fontSize: '0.95rem', fontFamily: 'inherit', color: '#2c3e50', background: '#fafaf8' }} />
+            <button onClick={() => setSearchText('')} style={{ padding: '12px 20px', background: '#e8e7e4', color: '#666', border: 'none', borderRadius: '10px', fontSize: '0.9rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease', whiteSpace: 'nowrap' }}>清除</button>
           </div>
         </div>
 
