@@ -420,6 +420,11 @@ function App() {
     return posts.filter(p => p.posted_at && p.posted_at.split('T')[0] === today).length;
   };
 
+  const getYesterdayPostedCount = () => {
+    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+    return posts.filter(p => p.posted_at && p.posted_at.split('T')[0] === yesterday).length;
+  };
+
   const filteredPosts = posts
     .filter(p => {
       if (currentFilter === '全部') return true;
@@ -588,9 +593,15 @@ function App() {
           </div>
         )}
 
-        <div style={{ marginBottom: '24px', padding: '16px', background: '#faf9f6', borderRadius: '12px', textAlign: 'center' }}>
-          <p style={{ fontSize: '0.95rem', color: '#666', marginBottom: '8px' }}>📅 今日發文</p>
-          <p style={{ fontSize: '2rem', fontWeight: '700', color: '#b8a88f' }}>{getTodayPostedCount()} 篇</p>
+        <div style={{ marginBottom: '24px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          <div style={{ padding: '16px', background: '#faf9f6', borderRadius: '12px', textAlign: 'center' }}>
+            <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '8px' }}>📅 今日發文</p>
+            <p style={{ fontSize: '1.8rem', fontWeight: '700', color: '#b8a88f' }}>{getTodayPostedCount()} 篇</p>
+          </div>
+          <div style={{ padding: '16px', background: '#faf9f6', borderRadius: '12px', textAlign: 'center' }}>
+            <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '8px' }}>📆 昨日發文</p>
+            <p style={{ fontSize: '1.8rem', fontWeight: '700', color: '#b8a88f' }}>{getYesterdayPostedCount()} 篇</p>
+          </div>
         </div>
 
         <div style={{ display: 'flex', gap: '10px', marginBottom: '32px', justifyContent: 'center', flexWrap: 'wrap' }}>
