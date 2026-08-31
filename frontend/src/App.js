@@ -319,7 +319,7 @@ function App() {
       if (isIOS) {
         setTimeout(() => {
           window.open(imageUrl, '_blank');
-        }, i * 100);
+        }, i * 30);
       } else {
         setTimeout(async () => {
           try {
@@ -337,7 +337,7 @@ function App() {
           } catch (error) {
             console.error('下載失敗:', error);
           }
-        }, i * 300);
+        }, i * 100);
       }
     }
   };
