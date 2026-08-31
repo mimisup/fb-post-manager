@@ -416,7 +416,12 @@ function App() {
   };
 
   const filteredPosts = posts
-    .filter(p => currentFilter === '全部' || p.category === currentFilter)
+    .filter(p => {
+      if (currentFilter === '全部') return true;
+      if (currentFilter === '未發文') return !p.posted_at;
+      if (currentFilter === '已發文') return !!p.posted_at;
+      return p.category === currentFilter;
+    })
     .filter(p => !searchAddress || (p.address && p.address.includes(searchAddress)));
 
   if (!user) {
@@ -578,7 +583,7 @@ function App() {
         )}
 
         <div style={{ display: 'flex', gap: '10px', marginBottom: '32px', justifyContent: 'center', flexWrap: 'wrap' }}>
-          {['全部', '商用', '住用'].map((cat) => (
+          {['全部', '商用', '住用', '未發文', '已發文'].map((cat) => (
             <button key={cat} onClick={() => setCurrentFilter(cat)} style={{ padding: '10px 22px', border: '1.5px solid #e8e7e4', background: currentFilter === cat ? '#b8a88f' : 'white', color: currentFilter === cat ? 'white' : '#666', borderRadius: '20px', cursor: 'pointer', fontWeight: '600', fontSize: '0.9rem', transition: 'all 0.3s ease' }}>
               {cat}
             </button>
