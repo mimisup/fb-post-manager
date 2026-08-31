@@ -44,6 +44,7 @@ function App() {
 
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
+  const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
 
   const checkAuth = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -489,6 +490,14 @@ function App() {
         </div>
 
         <div style={{ background: 'white', borderRadius: '16px', padding: isMobile ? '20px' : '40px', marginBottom: '40px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.04)', border: '1px solid rgba(0, 0, 0, 0.02)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px' }}>
+            <h2 style={{ fontSize: isMobile ? '1.1rem' : '1.3rem', fontWeight: '600', color: '#2c3e50', margin: 0 }}>建立新貼文</h2>
+            <button onClick={() => setIsCreateFormOpen(!isCreateFormOpen)} style={{ padding: '8px 16px', background: isCreateFormOpen ? '#b8a88f' : '#e8e7e4', color: isCreateFormOpen ? 'white' : '#666', border: 'none', borderRadius: '10px', fontSize: '0.9rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease' }}>
+              {isCreateFormOpen ? '▼ 收合' : '▶ 展開'}
+            </button>
+          </div>
+
+          {isCreateFormOpen && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '28px' }}>
             <button onClick={() => document.getElementById('csvFile').click()} style={{ padding: '12px', background: '#d4c5b9', color: '#6b5544', border: 'none', borderRadius: '10px', fontWeight: '600', cursor: 'pointer' }}>📋 匯入 CSV</button>
             {csvData.length > 0 && (
@@ -576,6 +585,7 @@ function App() {
             <button onClick={resetForm} style={{ padding: '12px 28px', border: '1.5px solid #e8e7e4', background: '#e8e7e4', borderRadius: '24px', cursor: 'pointer', fontSize: '0.95rem', fontWeight: '600', color: '#2c3e50', transition: 'all 0.3s ease' }}>清空</button>
             <button onClick={addPost} style={{ padding: '12px 28px', background: 'linear-gradient(135deg, #b8a88f 0%, #a89680 100%)', color: 'white', border: 'none', borderRadius: '24px', cursor: 'pointer', fontSize: '0.95rem', fontWeight: '600', transition: 'all 0.3s ease', flex: 1 }}>儲存貼文</button>
           </div>
+          )}
         </div>
 
         <div style={{ marginBottom: '24px' }}>
