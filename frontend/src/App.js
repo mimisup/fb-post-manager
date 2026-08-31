@@ -8,6 +8,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 function App() {
+  const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
   const [currentFilter, setCurrentFilter] = useState('全部');
   const [postCategory, setPostCategory] = useState('商用');
@@ -25,14 +26,53 @@ function App() {
   const [importProgress, setImportProgress] = useState(0);
 
   useEffect(() => {
-    loadPosts();
+    checkAuth();
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      loadPosts();
+    }
+  }, [user]);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  const checkAuth = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    setUser(session?.user || null);
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user || null);
+    });
+
+    return () => subscription?.unsubscribe();
+  };
+
+  const signInWithGoogle = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin }
+      });
+      if (error) throw error;
+    } catch (error) {
+      console.error('Google 登入失敗:', error);
+      alert('登入失敗，請稍後重試');
+    }
+  };
+
+  const signOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+    } catch (error) {
+      console.error('登出失敗:', error);
+    }
+  };
 
   const loadPosts = async () => {
     try {
@@ -371,12 +411,29 @@ function App() {
     .filter(p => currentFilter === '全部' || p.category === currentFilter)
     .filter(p => !searchAddress || (p.address && p.address.includes(searchAddress)));
 
+  if (!user) {
+    return (
+      <div style={{ background: 'linear-gradient(135deg, #faf9f6 0%, #f8f9fa 100%)', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", sans-serif', padding: '20px' }}>
+        <div style={{ maxWidth: '400px', width: '100%', textAlign: 'center' }}>
+          <h1 style={{ fontSize: '2.5rem', fontWeight: '600', marginBottom: '16px', color: '#2c3e50' }}>FB 發文管理器</h1>
+          <p style={{ fontSize: '1rem', color: '#888', marginBottom: '40px', lineHeight: '1.6' }}>請用 Google 帳號登入以管理您的房產貼文</p>
+          <button onClick={signInWithGoogle} style={{ width: '100%', padding: '16px', background: 'linear-gradient(135deg, #b8a88f 0%, #a89680 100%)', color: 'white', border: 'none', borderRadius: '12px', fontSize: '1rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease' }}>
+            🔐 用 Google 登入
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ background: 'linear-gradient(135deg, #faf9f6 0%, #f8f9fa 100%)', minHeight: '100vh', padding: '40px 20px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", sans-serif', color: '#2c3e50' }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: isMobile ? '24px' : '50px' }}>
-          <h1 style={{ fontSize: isMobile ? '1.8rem' : '2.5rem', fontWeight: '600', letterSpacing: '-0.5px', marginBottom: '8px', color: '#2c3e50' }}>FB 發文管理器</h1>
-          <p style={{ fontSize: isMobile ? '0.8rem' : '0.95rem', color: '#888', fontWeight: '400' }}>輕鬆管理您的社群內容，一鍵複製與下載</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isMobile ? '24px' : '50px' }}>
+          <div style={{ textAlign: 'center', flex: 1 }}>
+            <h1 style={{ fontSize: isMobile ? '1.8rem' : '2.5rem', fontWeight: '600', letterSpacing: '-0.5px', marginBottom: '8px', color: '#2c3e50' }}>FB 發文管理器</h1>
+            <p style={{ fontSize: isMobile ? '0.8rem' : '0.95rem', color: '#888', fontWeight: '400' }}>輕鬆管理您的社群內容，一鍵複製與下載</p>
+          </div>
+          <button onClick={signOut} style={{ padding: '10px 20px', background: '#f0ebe4', color: '#c1665a', border: 'none', borderRadius: '10px', fontSize: '0.9rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease', whiteSpace: 'nowrap', marginLeft: '16px' }}>🚪 登出</button>
         </div>
 
         <div style={{ background: 'white', borderRadius: '16px', padding: isMobile ? '20px' : '40px', marginBottom: '40px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.04)', border: '1px solid rgba(0, 0, 0, 0.02)' }}>
