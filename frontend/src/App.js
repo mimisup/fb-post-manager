@@ -41,6 +41,9 @@ function App() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+
   const checkAuth = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     setUser(session?.user || null);
@@ -52,20 +55,23 @@ function App() {
     return () => subscription?.unsubscribe();
   };
 
-  const signInWithGoogle = async () => {
-    try {
-      const redirectUrl = window.location.hostname === 'localhost'
-        ? 'http://localhost:3000'
-        : 'https://frontend-two-sage-29.vercel.app';
+  const signInWithEmail = async () => {
+    if (!loginEmail || !loginPassword) {
+      alert('請輸入帳號和密碼');
+      return;
+    }
 
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: redirectUrl }
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: loginEmail,
+        password: loginPassword
       });
       if (error) throw error;
+      setLoginEmail('');
+      setLoginPassword('');
     } catch (error) {
-      console.error('Google 登入失敗:', error);
-      alert('登入失敗，請稍後重試');
+      console.error('登入失敗:', error);
+      alert('帳號或密碼錯誤');
     }
   };
 
@@ -418,11 +424,37 @@ function App() {
   if (!user) {
     return (
       <div style={{ background: 'linear-gradient(135deg, #faf9f6 0%, #f8f9fa 100%)', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", sans-serif', padding: '20px' }}>
-        <div style={{ maxWidth: '400px', width: '100%', textAlign: 'center' }}>
-          <h1 style={{ fontSize: '2.5rem', fontWeight: '600', marginBottom: '16px', color: '#2c3e50' }}>FB 發文管理器</h1>
-          <p style={{ fontSize: '1rem', color: '#888', marginBottom: '40px', lineHeight: '1.6' }}>請用 Google 帳號登入以管理您的房產貼文</p>
-          <button onClick={signInWithGoogle} style={{ width: '100%', padding: '16px', background: 'linear-gradient(135deg, #b8a88f 0%, #a89680 100%)', color: 'white', border: 'none', borderRadius: '12px', fontSize: '1rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease' }}>
-            🔐 用 Google 登入
+        <div style={{ maxWidth: '400px', width: '100%', background: 'white', padding: '40px', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.04)' }}>
+          <h1 style={{ fontSize: '2rem', fontWeight: '600', marginBottom: '8px', textAlign: 'center', color: '#2c3e50' }}>FB 發文管理器</h1>
+          <p style={{ fontSize: '0.9rem', color: '#888', marginBottom: '32px', textAlign: 'center' }}>請登入以管理您的房產貼文</p>
+
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{ display: 'block', fontWeight: '600', fontSize: '0.9rem', marginBottom: '8px', color: '#2c3e50' }}>帳號</label>
+            <input
+              type="email"
+              value={loginEmail}
+              onChange={(e) => setLoginEmail(e.target.value)}
+              placeholder="輸入信箱"
+              style={{ width: '100%', padding: '12px 14px', border: '1.5px solid #e8e7e4', borderRadius: '10px', fontSize: '0.95rem', fontFamily: 'inherit', color: '#2c3e50', background: '#fafaf8', boxSizing: 'border-box' }}
+            />
+          </div>
+
+          <div style={{ marginBottom: '32px' }}>
+            <label style={{ display: 'block', fontWeight: '600', fontSize: '0.9rem', marginBottom: '8px', color: '#2c3e50' }}>密碼</label>
+            <input
+              type="password"
+              value={loginPassword}
+              onChange={(e) => setLoginPassword(e.target.value)}
+              placeholder="輸入密碼"
+              style={{ width: '100%', padding: '12px 14px', border: '1.5px solid #e8e7e4', borderRadius: '10px', fontSize: '0.95rem', fontFamily: 'inherit', color: '#2c3e50', background: '#fafaf8', boxSizing: 'border-box' }}
+            />
+          </div>
+
+          <button
+            onClick={signInWithEmail}
+            style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #b8a88f 0%, #a89680 100%)', color: 'white', border: 'none', borderRadius: '10px', fontSize: '1rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease' }}
+          >
+            🔐 登入
           </button>
         </div>
       </div>
