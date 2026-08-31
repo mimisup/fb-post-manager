@@ -54,9 +54,13 @@ function App() {
 
   const signInWithGoogle = async () => {
     try {
+      const redirectUrl = window.location.hostname === 'localhost'
+        ? 'http://localhost:3000'
+        : 'https://frontend-two-sage-29.vercel.app';
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: window.location.origin }
+        options: { redirectTo: redirectUrl }
       });
       if (error) throw error;
     } catch (error) {
