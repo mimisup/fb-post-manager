@@ -193,9 +193,7 @@ function App() {
   };
 
   const copyText = (text) => {
-    navigator.clipboard.writeText(text).then(() => {
-      alert('文案已複製到剪貼簿！');
-    }).catch(() => {
+    navigator.clipboard.writeText(text).catch(() => {
       alert('複製失敗');
     });
   };
