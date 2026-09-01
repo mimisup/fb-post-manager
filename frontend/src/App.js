@@ -709,6 +709,11 @@ function App() {
                         {post.posted_at ? `✓ ${new Date(post.posted_at).toLocaleDateString('zh-TW')} ${new Date(post.posted_at).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })}` : '標記為已發'}
                       </button>
                     </div>
+                    {post.address && (
+                      <div style={{ color: post.category === '商用' ? '#9d7d54' : '#5a7c5b', fontSize: '0.9rem', marginBottom: '12px', padding: '8px 12px', background: post.category === '商用' ? '#e8dcc8' : '#d9e4d4', borderRadius: '8px', borderLeft: `3px solid ${post.category === '商用' ? '#b8a88f' : '#7fa87f'}` }}>
+                        📍 {post.address}
+                      </div>
+                    )}
                     {post.image_ids && post.image_ids.length > 0 && (
                       <div style={{ marginBottom: '16px' }}>
                         <div style={{ marginBottom: '8px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: '8px' }}>
@@ -728,11 +733,6 @@ function App() {
                             <button onClick={() => shareSelectedImages(post.id, post.image_ids.split(',').filter(Boolean))} style={{ width: '100%', padding: '8px', background: '#b8a88f', color: 'white', border: 'none', borderRadius: '8px', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer' }}>📱 分享到相簿</button>
                           )}
                         </div>
-                      </div>
-                    )}
-                    {post.address && (
-                      <div style={{ color: post.category === '商用' ? '#9d7d54' : '#5a7c5b', fontSize: '0.9rem', marginBottom: '12px', padding: '8px 12px', background: post.category === '商用' ? '#e8dcc8' : '#d9e4d4', borderRadius: '8px', borderLeft: `3px solid ${post.category === '商用' ? '#b8a88f' : '#7fa87f'}` }}>
-                        📍 {post.address}
                       </div>
                     )}
                     <div style={{ color: '#2c3e50', fontSize: '0.95rem', lineHeight: '1.6', marginBottom: '16px', maxHeight: '120px', overflowY: 'auto', padding: '12px', background: '#fafaf8', borderRadius: '10px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
