@@ -716,6 +716,10 @@ function App() {
                     )}
                     {post.image_ids && post.image_ids.length > 0 && (
                       <div style={{ marginBottom: '16px' }}>
+                        <div style={{ marginBottom: '8px', display: 'flex', gap: '8px', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontSize: '0.85rem', color: '#666' }}>已選: {(selectedPostImages[post.id] || []).length}/{post.image_ids.split(',').filter(Boolean).length}</span>
+                          <button onClick={() => setSelectedPostImages({ ...selectedPostImages, [post.id]: post.image_ids.split(',').filter(Boolean) })} style={{ padding: '4px 12px', background: '#7fa87f', color: 'white', border: 'none', borderRadius: '8px', fontSize: '0.8rem', fontWeight: '600', cursor: 'pointer' }}>全選</button>
+                        </div>
                         <div style={{ marginBottom: '8px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: '8px' }}>
                           {post.image_ids.split(',').filter(Boolean).map(id => {
                             const isSelected = (selectedPostImages[post.id] || []).includes(id);
