@@ -432,6 +432,14 @@ function App() {
       if (currentFilter === '全部') return true;
       if (currentFilter === '未發文') return !p.posted_at;
       if (currentFilter === '已發文') return !!p.posted_at;
+      if (currentFilter === '今日已發過的') {
+        const today = new Date().toISOString().split('T')[0];
+        return p.posted_at && p.posted_at.split('T')[0] === today;
+      }
+      if (currentFilter === '今日未發過的') {
+        const today = new Date().toISOString().split('T')[0];
+        return !p.posted_at && p.created_at && p.created_at.split('T')[0] === today;
+      }
       if (currentFilter === '未有照片') return !p.image_ids || p.image_ids.trim().length === 0;
       return p.category === currentFilter;
     })
@@ -623,7 +631,7 @@ function App() {
         </div>
 
         <div style={{ display: 'flex', gap: '10px', marginBottom: '32px', justifyContent: 'center', flexWrap: 'wrap' }}>
-          {['全部', '商用', '住用', '未發文', '已發文', '未有照片'].map((cat) => (
+          {['全部', '商用', '住用', '未發文', '已發文', '今日已發過的', '今日未發過的', '未有照片'].map((cat) => (
             <button key={cat} onClick={() => setCurrentFilter(cat)} style={{ padding: '10px 22px', border: '1.5px solid #e8e7e4', background: currentFilter === cat ? '#b8a88f' : 'white', color: currentFilter === cat ? 'white' : '#666', borderRadius: '20px', cursor: 'pointer', fontWeight: '600', fontSize: '0.9rem', transition: 'all 0.3s ease' }}>
               {cat}
             </button>
