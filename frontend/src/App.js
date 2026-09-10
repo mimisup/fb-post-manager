@@ -517,6 +517,7 @@ function App() {
           </div>
 
           {isCreateFormOpen && (
+          <>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '28px' }}>
             <button onClick={() => document.getElementById('csvFile').click()} style={{ padding: '12px', background: '#d4c5b9', color: '#6b5544', border: 'none', borderRadius: '10px', fontWeight: '600', cursor: 'pointer' }}>📋 匯入 CSV</button>
             {csvData.length > 0 && (
@@ -604,6 +605,7 @@ function App() {
             <button onClick={resetForm} style={{ padding: '12px 28px', border: '1.5px solid #e8e7e4', background: '#e8e7e4', borderRadius: '24px', cursor: 'pointer', fontSize: '0.95rem', fontWeight: '600', color: '#2c3e50', transition: 'all 0.3s ease' }}>清空</button>
             <button onClick={addPost} style={{ padding: '12px 28px', background: 'linear-gradient(135deg, #b8a88f 0%, #a89680 100%)', color: 'white', border: 'none', borderRadius: '24px', cursor: 'pointer', fontSize: '0.95rem', fontWeight: '600', transition: 'all 0.3s ease', flex: 1 }}>儲存貼文</button>
           </div>
+          </>
           )}
         </div>
 
