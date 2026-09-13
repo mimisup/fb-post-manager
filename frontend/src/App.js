@@ -443,7 +443,8 @@ function App() {
       if (currentFilter === '⭐️') return !!p.is_starred;
       if (currentFilter === '今日未發文') {
         const today = new Date().toISOString().split('T')[0];
-        return !p.posted_at && p.created_at && p.created_at.split('T')[0] === today;
+        const postedDate = p.posted_at ? p.posted_at.split('T')[0] : null;
+        return postedDate !== today;
       }
       if (currentFilter === '今日已發過的') {
         const today = new Date().toISOString().split('T')[0];
