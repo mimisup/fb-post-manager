@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import Papa from 'papaparse';
 import './App.css';
@@ -427,34 +427,34 @@ function App() {
     }
   };
 
-  const getTodayPostedCount = () => {
-    const today = new Date().toISOString().split('T')[0];
+  const today = useMemo(() => new Date().toISOString().split('T')[0], []);
+  const yesterday = useMemo(() => new Date(Date.now() - 86400000).toISOString().split('T')[0], []);
+
+  const getTodayPostedCount = useMemo(() => {
     return posts.filter(p => p.posted_at && p.posted_at.split('T')[0] === today).length;
-  };
+  }, [posts, today]);
 
-  const getYesterdayPostedCount = () => {
-    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+  const getYesterdayPostedCount = useMemo(() => {
     return posts.filter(p => p.posted_at && p.posted_at.split('T')[0] === yesterday).length;
-  };
+  }, [posts, yesterday]);
 
-  const filteredPosts = posts
+  const filteredPosts = useMemo(() => posts
     .filter(p => {
       if (currentFilter === '全部') return true;
       if (currentFilter === '⭐️') return !!p.is_starred;
       if (currentFilter === '今日未發文') {
-        const today = new Date().toISOString().split('T')[0];
         const postedDate = p.posted_at ? p.posted_at.split('T')[0] : null;
         return postedDate !== today;
       }
       if (currentFilter === '今日已發過的') {
-        const today = new Date().toISOString().split('T')[0];
         return p.posted_at && p.posted_at.split('T')[0] === today;
       }
       if (currentFilter === '未有照片') return !p.image_ids || p.image_ids.trim().length === 0;
       return p.category === currentFilter;
     })
     .filter(p => !searchAddress || (p.address && p.address.includes(searchAddress)))
-    .filter(p => !searchText || (p.text && p.text.includes(searchText)));
+    .filter(p => !searchText || (p.text && p.text.includes(searchText))),
+  [posts, currentFilter, searchAddress, searchText, today]);
 
   if (!user) {
     return (
@@ -634,11 +634,11 @@ function App() {
         <div style={{ marginBottom: '24px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
           <div style={{ padding: '16px', background: '#faf9f6', borderRadius: '12px', textAlign: 'center' }}>
             <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '8px' }}>📅 今日發文</p>
-            <p style={{ fontSize: '1.8rem', fontWeight: '700', color: '#b8a88f' }}>{getTodayPostedCount()} 篇</p>
+            <p style={{ fontSize: '1.8rem', fontWeight: '700', color: '#b8a88f' }}>{getTodayPostedCount} 篇</p>
           </div>
           <div style={{ padding: '16px', background: '#faf9f6', borderRadius: '12px', textAlign: 'center' }}>
             <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '8px' }}>📆 昨日發文</p>
-            <p style={{ fontSize: '1.8rem', fontWeight: '700', color: '#b8a88f' }}>{getYesterdayPostedCount()} 篇</p>
+            <p style={{ fontSize: '1.8rem', fontWeight: '700', color: '#b8a88f' }}>{getYesterdayPostedCount} 篇</p>
           </div>
         </div>
 
