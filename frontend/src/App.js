@@ -438,6 +438,17 @@ function App() {
     return posts.filter(p => p.posted_at && p.posted_at.split('T')[0] === yesterday).length;
   }, [posts, yesterday]);
 
+  const getLastSevenDaysStats = useMemo(() => {
+    const stats = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(Date.now() - i * 86400000).toISOString().split('T')[0];
+      const count = posts.filter(p => p.posted_at && p.posted_at.split('T')[0] === date).length;
+      const dayName = ['日', '一', '二', '三', '四', '五', '六'][new Date(date).getDay()];
+      stats.push({ date, count, dayName });
+    }
+    return stats;
+  }, [posts]);
+
   const filteredPosts = useMemo(() => posts
     .filter(p => {
       if (currentFilter === '全部') return true;
@@ -639,6 +650,19 @@ function App() {
           <div style={{ padding: '16px', background: '#faf9f6', borderRadius: '12px', textAlign: 'center' }}>
             <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '8px' }}>📆 昨日發文</p>
             <p style={{ fontSize: '1.8rem', fontWeight: '700', color: '#b8a88f' }}>{getYesterdayPostedCount} 篇</p>
+          </div>
+        </div>
+
+        <div style={{ marginBottom: '32px', padding: '16px', background: '#faf9f6', borderRadius: '12px' }}>
+          <h3 style={{ fontSize: '0.95rem', fontWeight: '600', marginBottom: '12px', color: '#2c3e50' }}>📊 最近 7 天發文統計</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(50px, 1fr))', gap: '8px', textAlign: 'center' }}>
+            {getLastSevenDaysStats.map((stat, idx) => (
+              <div key={idx} style={{ padding: '8px', background: 'white', borderRadius: '8px', border: '1px solid #e8e7e4' }}>
+                <p style={{ fontSize: '0.75rem', color: '#999', marginBottom: '4px' }}>週{stat.dayName}</p>
+                <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '2px' }}>{stat.date.split('-')[2]}</p>
+                <p style={{ fontSize: '1.2rem', fontWeight: '700', color: '#b8a88f' }}>{stat.count}</p>
+              </div>
+            ))}
           </div>
         </div>
 
