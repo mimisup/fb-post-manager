@@ -97,6 +97,24 @@ function App() {
       const { data: historyData, error: historyError } = await supabase.from('post_history').select('*').order('posted_date', { ascending: false });
       if (!historyError) {
         setPostHistory(historyData || []);
+
+        // 數據遷移：把舊的已發文貼文寫入 post_history
+        const existingDates = new Set(historyData?.map(h => h.posted_date) || []);
+        const postsToMigrate = (data || []).filter(p => p.posted_at && !existingDates.has(p.posted_at.split('T')[0]));
+
+        if (postsToMigrate.length > 0) {
+          const historyRecords = [...new Set(postsToMigrate.map(p => p.posted_at.split('T')[0]))].map(date => ({
+            user_id: user.id,
+            posted_date: date
+          }));
+
+          await supabase.from('post_history').insert(historyRecords);
+          console.log(`已遷移 ${historyRecords.length} 天的發文記錄`);
+
+          // 重新載入
+          const { data: newHistoryData } = await supabase.from('post_history').select('*');
+          setPostHistory(newHistoryData || []);
+        }
       }
     } catch (error) {
       console.error('Error loading posts:', error);
