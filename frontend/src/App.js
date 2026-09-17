@@ -102,7 +102,7 @@ function App() {
         const existingDates = new Set(historyData?.map(h => h.posted_date) || []);
         const postsToMigrate = (data || []).filter(p => p.posted_at && !existingDates.has(p.posted_at.split('T')[0]));
 
-        if (postsToMigrate.length > 0) {
+        if (postsToMigrate.length > 0 && user?.id) {
           const historyRecords = [...new Set(postsToMigrate.map(p => p.posted_at.split('T')[0]))].map(date => ({
             user_id: user.id,
             posted_date: date
