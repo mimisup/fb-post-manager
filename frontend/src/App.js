@@ -25,6 +25,7 @@ function App() {
   const [selectedPostImages, setSelectedPostImages] = useState({});
   const [csvData, setCsvData] = useState([]);
   const [importProgress, setImportProgress] = useState(0);
+  const [postHistory, setPostHistory] = useState([]);
 
   useEffect(() => {
     checkAuth();
@@ -91,6 +92,12 @@ function App() {
       const { data, error } = await supabase.from('posts').select('*').order('created_at', { ascending: false });
       if (error) throw error;
       setPosts(data || []);
+
+      // 載入發文歷史記錄用於統計
+      const { data: historyData, error: historyError } = await supabase.from('post_history').select('*').order('posted_date', { ascending: false });
+      if (!historyError) {
+        setPostHistory(historyData || []);
+      }
     } catch (error) {
       console.error('Error loading posts:', error);
     }
@@ -409,7 +416,17 @@ function App() {
   const markAsPosted = async (postId) => {
     try {
       const now = new Date().toISOString();
+      const postedDate = now.split('T')[0];
+
+      // 更新貼文的 posted_at
       await supabase.from('posts').update({ posted_at: now }).eq('id', postId);
+
+      // 記錄到 post_history（用於統計）
+      await supabase.from('post_history').insert({
+        user_id: user.id,
+        posted_date: postedDate
+      });
+
       loadPosts();
     } catch (error) {
       console.error('Error marking as posted:', error);
@@ -431,25 +448,23 @@ function App() {
   const yesterday = useMemo(() => new Date(Date.now() - 86400000).toISOString().split('T')[0], []);
 
   const getTodayPostedCount = useMemo(() => {
-    return posts.filter(p => p.posted_at && p.posted_at.split('T')[0] === today).length;
-  }, [posts, today]);
+    return postHistory.filter(h => h.posted_date === today).length;
+  }, [postHistory, today]);
 
   const getYesterdayPostedCount = useMemo(() => {
-    return posts.filter(p => p.posted_at && p.posted_at.split('T')[0] === yesterday).length;
-  }, [posts, yesterday]);
+    return postHistory.filter(h => h.posted_date === yesterday).length;
+  }, [postHistory, yesterday]);
 
   const getLastSevenDaysStats = useMemo(() => {
     const stats = [];
     for (let i = 6; i >= 0; i--) {
       const date = new Date(Date.now() - i * 86400000).toISOString().split('T')[0];
-      const count = posts.filter(p => p.posted_at && p.posted_at.split('T')[0] === date).length;
+      const count = postHistory.filter(h => h.posted_date === date).length;
       const dayName = ['日', '一', '二', '三', '四', '五', '六'][new Date(date).getDay()];
       stats.push({ date, count, dayName });
     }
-    console.log('Last 7 days stats:', stats);
-    console.log('Sample posted_at values:', posts.slice(0, 5).map(p => ({ id: p.id, posted_at: p.posted_at })));
     return stats;
-  }, [posts]);
+  }, [postHistory]);
 
   const filteredPosts = useMemo(() => posts
     .filter(p => {
