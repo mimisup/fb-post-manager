@@ -446,6 +446,8 @@ function App() {
       const dayName = ['日', '一', '二', '三', '四', '五', '六'][new Date(date).getDay()];
       stats.push({ date, count, dayName });
     }
+    console.log('Last 7 days stats:', stats);
+    console.log('Sample posted_at values:', posts.slice(0, 5).map(p => ({ id: p.id, posted_at: p.posted_at })));
     return stats;
   }, [posts]);
 
