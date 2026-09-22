@@ -481,6 +481,11 @@ function App() {
     }
   };
 
+  const getAccountPostedDate = (postId, account) => {
+    const today = new Date().toISOString().split('T')[0];
+    return postHistory.find(h => h.posted_date === today && h.account === account);
+  };
+
   const today = useMemo(() => new Date().toISOString().split('T')[0], []);
   const yesterday = useMemo(() => new Date(Date.now() - 86400000).toISOString().split('T')[0], []);
 
@@ -793,11 +798,11 @@ function App() {
                       <button onClick={() => toggleStar(post.id, post.is_starred)} style={{ padding: '6px 12px', background: post.is_starred ? '#ffc107' : '#f0ebe4', color: post.is_starred ? 'white' : '#888', border: 'none', borderRadius: '12px', fontSize: '1rem', cursor: 'pointer', transition: 'all 0.3s ease' }}>
                         {post.is_starred ? '⭐' : '☆'}
                       </button>
-                      <button onClick={() => markAsPosted(post.id, 'account1')} style={{ padding: '6px 12px', background: post.posted_at ? '#7fa87f' : '#f0ebe4', color: post.posted_at ? 'white' : '#888', border: 'none', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease', whiteSpace: 'nowrap' }}>
-                        {post.posted_at ? `✓ ${new Date(post.posted_at).toLocaleDateString('zh-TW')}` : '本帳'}
+                      <button onClick={() => markAsPosted(post.id, 'account1')} style={{ padding: '6px 12px', background: getAccountPostedDate(post.id, 'account1') ? '#7fa87f' : '#f0ebe4', color: getAccountPostedDate(post.id, 'account1') ? 'white' : '#888', border: 'none', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease', whiteSpace: 'nowrap' }}>
+                        {getAccountPostedDate(post.id, 'account1') ? '✓ 本帳' : '本帳'}
                       </button>
-                      <button onClick={() => markAsPosted(post.id, 'account2')} style={{ padding: '6px 12px', background: '#f0ebe4', color: '#888', border: 'none', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease', whiteSpace: 'nowrap' }}>
-                        小帳
+                      <button onClick={() => markAsPosted(post.id, 'account2')} style={{ padding: '6px 12px', background: getAccountPostedDate(post.id, 'account2') ? '#7fa87f' : '#f0ebe4', color: getAccountPostedDate(post.id, 'account2') ? 'white' : '#888', border: 'none', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease', whiteSpace: 'nowrap' }}>
+                        {getAccountPostedDate(post.id, 'account2') ? '✓ 小帳' : '小帳'}
                       </button>
                     </div>
                     {post.address && (
