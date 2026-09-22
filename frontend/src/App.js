@@ -622,16 +622,7 @@ function App() {
               <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
                 <button onClick={() => setPostCategory('商用')} style={{ flex: 1, padding: '12px 14px', border: '1.5px solid #e8e7e4', background: postCategory === '商用' ? '#b8a88f' : '#fafaf8', color: postCategory === '商用' ? 'white' : '#2c3e50', borderRadius: '10px', fontSize: '0.95rem', fontWeight: '600', fontFamily: 'inherit', transition: 'all 0.3s ease', cursor: 'pointer', height: '44px' }}>商用</button>
                 <button onClick={() => setPostCategory('住用')} style={{ flex: 1, padding: '12px 14px', border: '1.5px solid #e8e7e4', background: postCategory === '住用' ? '#b8a88f' : '#fafaf8', color: postCategory === '住用' ? 'white' : '#2c3e50', borderRadius: '10px', fontSize: '0.95rem', fontWeight: '600', fontFamily: 'inherit', transition: 'all 0.3s ease', cursor: 'pointer', height: '44px' }}>住用</button>
-                <button onClick={() => setShowAccountOptions(!showAccountOptions)} style={{ flex: 0.8, padding: '12px 14px', border: '1.5px solid #e8e7e4', background: showAccountOptions ? '#b8a88f' : '#fafaf8', color: showAccountOptions ? 'white' : '#2c3e50', borderRadius: '10px', fontSize: '0.8rem', fontWeight: '600', fontFamily: 'inherit', transition: 'all 0.3s ease', cursor: 'pointer', height: '44px' }}>
-                  {showAccountOptions ? '▼ 帳' : '▶ 帳'}
-                </button>
               </div>
-              {showAccountOptions && (
-                <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
-                  <button onClick={() => setPostAccount('account1')} style={{ flex: 1, padding: '12px 14px', border: '1.5px solid #e8e7e4', background: postAccount === 'account1' ? '#b8a88f' : '#fafaf8', color: postAccount === 'account1' ? 'white' : '#2c3e50', borderRadius: '10px', fontSize: '0.95rem', fontWeight: '600', fontFamily: 'inherit', transition: 'all 0.3s ease', cursor: 'pointer', height: '44px' }}>帳號1</button>
-                  <button onClick={() => setPostAccount('account2')} style={{ flex: 1, padding: '12px 14px', border: '1.5px solid #e8e7e4', background: postAccount === 'account2' ? '#b8a88f' : '#fafaf8', color: postAccount === 'account2' ? 'white' : '#2c3e50', borderRadius: '10px', fontSize: '0.95rem', fontWeight: '600', fontFamily: 'inherit', transition: 'all 0.3s ease', cursor: 'pointer', height: '44px' }}>帳號2</button>
-                </div>
-              )}
             </div>
 
             <div>
