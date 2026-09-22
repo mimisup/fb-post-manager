@@ -13,8 +13,6 @@ function App() {
   const [posts, setPosts] = useState([]);
   const [currentFilter, setCurrentFilter] = useState('全部');
   const [postCategory, setPostCategory] = useState('商用');
-  const [postAccount, setPostAccount] = useState('account1');
-  const [showAccountOptions, setShowAccountOptions] = useState(false);
   const [postAddress, setPostAddress] = useState('');
   const [postContent, setPostContent] = useState('');
   const [selectedImages, setSelectedImages] = useState([]);
@@ -201,7 +199,6 @@ function App() {
         address: postAddress,
         text: postContent,
         image_ids: imageIds.join(','),
-        account: postAccount,
         is_hidden: false
       });
 
@@ -391,8 +388,7 @@ function App() {
       category: post.category,
       address: post.address || '',
       text: post.text || '',
-      image_ids: post.image_ids || '',
-      account: post.account || 'account1'
+      image_ids: post.image_ids || ''
     });
     setEditingImages({ [post.id]: [] });
   };
