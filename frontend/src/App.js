@@ -443,6 +443,7 @@ function App() {
     try {
       const now = new Date().toISOString();
       const postedDate = now.split('T')[0];
+      const postedTime = now.split('T')[1].substring(0, 5);
 
       // 更新貼文的 posted_at（只記錄時間，不區分帳號）
       await supabase.from('posts').update({ posted_at: now }).eq('id', postId);
@@ -451,6 +452,7 @@ function App() {
       await supabase.from('post_history').insert({
         user_id: user.id,
         posted_date: postedDate,
+        posted_time: postedTime,
         account: account
       });
 
@@ -799,10 +801,10 @@ function App() {
                         {post.is_starred ? '⭐' : '☆'}
                       </button>
                       <button onClick={() => markAsPosted(post.id, 'account1')} style={{ padding: '6px 12px', background: getAccountPostedDate(post.id, 'account1') ? '#7fa87f' : '#f0ebe4', color: getAccountPostedDate(post.id, 'account1') ? 'white' : '#888', border: 'none', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease', whiteSpace: 'nowrap' }}>
-                        {getAccountPostedDate(post.id, 'account1') ? '✓ 本帳' : '本帳'}
+                        {getAccountPostedDate(post.id, 'account1') ? `✓ 本帳 ${getAccountPostedDate(post.id, 'account1').posted_time}` : '本帳'}
                       </button>
                       <button onClick={() => markAsPosted(post.id, 'account2')} style={{ padding: '6px 12px', background: getAccountPostedDate(post.id, 'account2') ? '#7fa87f' : '#f0ebe4', color: getAccountPostedDate(post.id, 'account2') ? 'white' : '#888', border: 'none', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease', whiteSpace: 'nowrap' }}>
-                        {getAccountPostedDate(post.id, 'account2') ? '✓ 小帳' : '小帳'}
+                        {getAccountPostedDate(post.id, 'account2') ? `✓ 小帳 ${getAccountPostedDate(post.id, 'account2').posted_time}` : '小帳'}
                       </button>
                     </div>
                     {post.address && (
