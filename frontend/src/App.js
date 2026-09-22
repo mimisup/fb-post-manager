@@ -439,21 +439,18 @@ function App() {
     }
   };
 
-  const markAsPosted = async (postId, account) => {
+  const markAsPosted = async (postId) => {
     try {
       const now = new Date().toISOString();
       const postedDate = now.split('T')[0];
-      const postedTime = now.split('T')[1].substring(0, 5);
 
-      // 更新貼文的 posted_at（只記錄時間，不區分帳號）
+      // 更新貼文的 posted_at
       await supabase.from('posts').update({ posted_at: now }).eq('id', postId);
 
       // 記錄到 post_history（用於統計）
       await supabase.from('post_history').insert({
         user_id: user.id,
-        posted_date: postedDate,
-        posted_time: postedTime,
-        account: account
+        posted_date: postedDate
       });
 
       loadPosts();
@@ -800,14 +797,9 @@ function App() {
                       <button onClick={() => toggleStar(post.id, post.is_starred)} style={{ padding: '6px 12px', background: post.is_starred ? '#ffc107' : '#f0ebe4', color: post.is_starred ? 'white' : '#888', border: 'none', borderRadius: '12px', fontSize: '1rem', cursor: 'pointer', transition: 'all 0.3s ease' }}>
                         {post.is_starred ? '⭐' : '☆'}
                       </button>
-                      <div style={{ display: 'flex', gap: '12px', marginBottom: '8px' }}>
-                        <button onClick={() => markAsPosted(post.id, 'account1')} style={{ flex: 1, padding: '8px 12px', background: getAccountPostedDate(post.id, 'account1') ? '#7fa87f' : '#f0ebe4', color: getAccountPostedDate(post.id, 'account1') ? 'white' : '#888', border: 'none', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease' }}>
-                          {getAccountPostedDate(post.id, 'account1') ? `✓ 本帳 ${getAccountPostedDate(post.id, 'account1').posted_date} ${getAccountPostedDate(post.id, 'account1').posted_time || ''}` : '本帳'}
-                        </button>
-                        <button onClick={() => markAsPosted(post.id, 'account2')} style={{ flex: 1, padding: '8px 12px', background: getAccountPostedDate(post.id, 'account2') ? '#7fa87f' : '#f0ebe4', color: getAccountPostedDate(post.id, 'account2') ? 'white' : '#888', border: 'none', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease' }}>
-                          {getAccountPostedDate(post.id, 'account2') ? `✓ 小帳 ${getAccountPostedDate(post.id, 'account2').posted_date} ${getAccountPostedDate(post.id, 'account2').posted_time || ''}` : '小帳'}
-                        </button>
-                      </div>
+                      <button onClick={() => markAsPosted(post.id)} style={{ padding: '6px 12px', background: post.posted_at ? '#7fa87f' : '#f0ebe4', color: post.posted_at ? 'white' : '#888', border: 'none', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease', whiteSpace: 'nowrap' }}>
+                        {post.posted_at ? `✓ ${new Date(post.posted_at).toLocaleDateString('zh-TW')} ${new Date(post.posted_at).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })}` : '標記為已發'}
+                      </button>
                     </div>
                     {post.address && (
                       <div style={{ color: post.category === '商用' ? '#9d7d54' : '#5a7c5b', fontSize: '0.9rem', marginBottom: '12px', padding: '8px 12px', background: post.category === '商用' ? '#e8dcc8' : '#d9e4d4', borderRadius: '8px', borderLeft: `3px solid ${post.category === '商用' ? '#b8a88f' : '#7fa87f'}` }}>
