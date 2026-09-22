@@ -802,10 +802,10 @@ function App() {
                       </button>
                       <div style={{ display: 'flex', gap: '12px', marginBottom: '8px' }}>
                         <button onClick={() => markAsPosted(post.id, 'account1')} style={{ flex: 1, padding: '8px 12px', background: getAccountPostedDate(post.id, 'account1') ? '#7fa87f' : '#f0ebe4', color: getAccountPostedDate(post.id, 'account1') ? 'white' : '#888', border: 'none', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease' }}>
-                          {getAccountPostedDate(post.id, 'account1') ? `✓ 本帳 ${post.posted_at ? `${new Date(post.posted_at).toLocaleDateString('zh-TW')} ${new Date(post.posted_at).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })}` : ''}` : '本帳'}
+                          {getAccountPostedDate(post.id, 'account1') ? `✓ 本帳 ${getAccountPostedDate(post.id, 'account1').posted_date} ${getAccountPostedDate(post.id, 'account1').posted_time || ''}` : '本帳'}
                         </button>
                         <button onClick={() => markAsPosted(post.id, 'account2')} style={{ flex: 1, padding: '8px 12px', background: getAccountPostedDate(post.id, 'account2') ? '#7fa87f' : '#f0ebe4', color: getAccountPostedDate(post.id, 'account2') ? 'white' : '#888', border: 'none', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease' }}>
-                          {getAccountPostedDate(post.id, 'account2') ? `✓ 小帳 ${post.posted_at ? `${new Date(post.posted_at).toLocaleDateString('zh-TW')} ${new Date(post.posted_at).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })}` : ''}` : '小帳'}
+                          {getAccountPostedDate(post.id, 'account2') ? `✓ 小帳 ${getAccountPostedDate(post.id, 'account2').posted_date} ${getAccountPostedDate(post.id, 'account2').posted_time || ''}` : '小帳'}
                         </button>
                       </div>
                     </div>
