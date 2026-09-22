@@ -800,17 +800,17 @@ function App() {
                       <button onClick={() => toggleStar(post.id, post.is_starred)} style={{ padding: '6px 12px', background: post.is_starred ? '#ffc107' : '#f0ebe4', color: post.is_starred ? 'white' : '#888', border: 'none', borderRadius: '12px', fontSize: '1rem', cursor: 'pointer', transition: 'all 0.3s ease' }}>
                         {post.is_starred ? '⭐' : '☆'}
                       </button>
-                      <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                        <button onClick={() => markAsPosted(post.id, 'account1')} style={{ padding: '6px 12px', background: getAccountPostedDate(post.id, 'account1') ? '#7fa87f' : '#f0ebe4', color: getAccountPostedDate(post.id, 'account1') ? 'white' : '#888', border: 'none', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease', whiteSpace: 'nowrap', flex: 1 }}>
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <button onClick={() => markAsPosted(post.id, 'account1')} style={{ padding: '6px 12px', background: getAccountPostedDate(post.id, 'account1') ? '#7fa87f' : '#f0ebe4', color: getAccountPostedDate(post.id, 'account1') ? 'white' : '#888', border: 'none', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease', whiteSpace: 'nowrap', minWidth: '60px' }}>
                           本帳
                         </button>
-                        {getAccountPostedDate(post.id, 'account1') && <span style={{ fontSize: '0.75rem', color: '#7fa87f', fontWeight: '600' }}>✓ {getAccountPostedDate(post.id, 'account1').posted_time}</span>}
+                        {getAccountPostedDate(post.id, 'account1') && <span style={{ fontSize: '0.7rem', color: '#7fa87f', fontWeight: '600', whiteSpace: 'nowrap' }}>✓ {getAccountPostedDate(post.id, 'account1').posted_time || '今日'}</span>}
                       </div>
-                      <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                        <button onClick={() => markAsPosted(post.id, 'account2')} style={{ padding: '6px 12px', background: getAccountPostedDate(post.id, 'account2') ? '#7fa87f' : '#f0ebe4', color: getAccountPostedDate(post.id, 'account2') ? 'white' : '#888', border: 'none', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease', whiteSpace: 'nowrap', flex: 1 }}>
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <button onClick={() => markAsPosted(post.id, 'account2')} style={{ padding: '6px 12px', background: getAccountPostedDate(post.id, 'account2') ? '#7fa87f' : '#f0ebe4', color: getAccountPostedDate(post.id, 'account2') ? 'white' : '#888', border: 'none', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease', whiteSpace: 'nowrap', minWidth: '60px' }}>
                           小帳
                         </button>
-                        {getAccountPostedDate(post.id, 'account2') && <span style={{ fontSize: '0.75rem', color: '#7fa87f', fontWeight: '600' }}>✓ {getAccountPostedDate(post.id, 'account2').posted_time}</span>}
+                        {getAccountPostedDate(post.id, 'account2') && <span style={{ fontSize: '0.7rem', color: '#7fa87f', fontWeight: '600', whiteSpace: 'nowrap' }}>✓ {getAccountPostedDate(post.id, 'account2').posted_time || '今日'}</span>}
                       </div>
                     </div>
                     {post.address && (
