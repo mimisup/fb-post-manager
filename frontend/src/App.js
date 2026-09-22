@@ -13,6 +13,7 @@ function App() {
   const [currentFilter, setCurrentFilter] = useState('全部');
   const [postCategory, setPostCategory] = useState('商用');
   const [postAccount, setPostAccount] = useState('account1');
+  const [showAccountOptions, setShowAccountOptions] = useState(false);
   const [postAddress, setPostAddress] = useState('');
   const [postContent, setPostContent] = useState('');
   const [selectedImages, setSelectedImages] = useState([]);
@@ -607,11 +608,18 @@ function App() {
                 <button onClick={() => setPostCategory('商用')} style={{ flex: 1, padding: '12px 14px', border: '1.5px solid #e8e7e4', background: postCategory === '商用' ? '#b8a88f' : '#fafaf8', color: postCategory === '商用' ? 'white' : '#2c3e50', borderRadius: '10px', fontSize: '0.95rem', fontWeight: '600', fontFamily: 'inherit', transition: 'all 0.3s ease', cursor: 'pointer', height: '44px' }}>商用</button>
                 <button onClick={() => setPostCategory('住用')} style={{ flex: 1, padding: '12px 14px', border: '1.5px solid #e8e7e4', background: postCategory === '住用' ? '#b8a88f' : '#fafaf8', color: postCategory === '住用' ? 'white' : '#2c3e50', borderRadius: '10px', fontSize: '0.95rem', fontWeight: '600', fontFamily: 'inherit', transition: 'all 0.3s ease', cursor: 'pointer', height: '44px' }}>住用</button>
               </div>
-              <label style={{ display: 'block', fontWeight: '600', fontSize: '0.95rem', marginBottom: '10px', color: '#2c3e50', letterSpacing: '0.2px' }}>帳號</label>
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <button onClick={() => setPostAccount('account1')} style={{ flex: 1, padding: '12px 14px', border: '1.5px solid #e8e7e4', background: postAccount === 'account1' ? '#b8a88f' : '#fafaf8', color: postAccount === 'account1' ? 'white' : '#2c3e50', borderRadius: '10px', fontSize: '0.95rem', fontWeight: '600', fontFamily: 'inherit', transition: 'all 0.3s ease', cursor: 'pointer', height: '44px' }}>帳號1</button>
-                <button onClick={() => setPostAccount('account2')} style={{ flex: 1, padding: '12px 14px', border: '1.5px solid #e8e7e4', background: postAccount === 'account2' ? '#b8a88f' : '#fafaf8', color: postAccount === 'account2' ? 'white' : '#2c3e50', borderRadius: '10px', fontSize: '0.95rem', fontWeight: '600', fontFamily: 'inherit', transition: 'all 0.3s ease', cursor: 'pointer', height: '44px' }}>帳號2</button>
-              </div>
+              <button onClick={() => setShowAccountOptions(!showAccountOptions)} style={{ display: 'block', width: '100%', padding: '12px 14px', border: '1.5px solid #e8e7e4', background: showAccountOptions ? '#b8a88f' : '#fafaf8', color: showAccountOptions ? 'white' : '#2c3e50', borderRadius: '10px', fontSize: '0.95rem', fontWeight: '600', fontFamily: 'inherit', transition: 'all 0.3s ease', cursor: 'pointer', height: '44px', marginBottom: '16px' }}>
+                {showAccountOptions ? '▼ 隱藏帳號' : '▶ 選擇帳號'}
+              </button>
+              {showAccountOptions && (
+                <div>
+                  <label style={{ display: 'block', fontWeight: '600', fontSize: '0.95rem', marginBottom: '10px', color: '#2c3e50', letterSpacing: '0.2px' }}>帳號</label>
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <button onClick={() => setPostAccount('account1')} style={{ flex: 1, padding: '12px 14px', border: '1.5px solid #e8e7e4', background: postAccount === 'account1' ? '#b8a88f' : '#fafaf8', color: postAccount === 'account1' ? 'white' : '#2c3e50', borderRadius: '10px', fontSize: '0.95rem', fontWeight: '600', fontFamily: 'inherit', transition: 'all 0.3s ease', cursor: 'pointer', height: '44px' }}>帳號1</button>
+                    <button onClick={() => setPostAccount('account2')} style={{ flex: 1, padding: '12px 14px', border: '1.5px solid #e8e7e4', background: postAccount === 'account2' ? '#b8a88f' : '#fafaf8', color: postAccount === 'account2' ? 'white' : '#2c3e50', borderRadius: '10px', fontSize: '0.95rem', fontWeight: '600', fontFamily: 'inherit', transition: 'all 0.3s ease', cursor: 'pointer', height: '44px' }}>帳號2</button>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div>
