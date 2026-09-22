@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import Papa from 'papaparse';
 import './App.css';
@@ -37,7 +37,8 @@ function App() {
     if (user) {
       loadPosts();
     }
-  }, [user, loadPosts]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -89,7 +90,7 @@ function App() {
     }
   };
 
-  const loadPosts = useCallback(async () => {
+  const loadPosts = async () => {
     try {
       const { data, error } = await supabase.from('posts').select('*').order('created_at', { ascending: false });
       if (error) throw error;
@@ -121,7 +122,7 @@ function App() {
     } catch (error) {
       console.error('Error loading posts:', error);
     }
-  }, [user]);
+  };
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
