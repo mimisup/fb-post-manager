@@ -200,7 +200,8 @@ function App() {
         address: postAddress,
         text: postContent,
         image_ids: imageIds.join(','),
-        account: postAccount
+        account: postAccount,
+        is_hidden: false
       });
 
       if (postError) throw postError;
@@ -314,7 +315,8 @@ function App() {
           category: 分類,
           address: 地址 || '',
           text: 文案,
-          image_ids: imageIds.join(',')
+          image_ids: imageIds.join(','),
+          is_hidden: false
         });
 
         if (!postError) {
@@ -388,7 +390,8 @@ function App() {
       category: post.category,
       address: post.address || '',
       text: post.text || '',
-      image_ids: post.image_ids || ''
+      image_ids: post.image_ids || '',
+      account: post.account || 'account1'
     });
     setEditingImages({ [post.id]: [] });
   };
@@ -466,6 +469,16 @@ function App() {
     }
   };
 
+  const toggleHidden = async (postId, currentHidden) => {
+    try {
+      await supabase.from('posts').update({ is_hidden: !currentHidden }).eq('id', postId);
+      loadPosts();
+    } catch (error) {
+      console.error('Error toggling hidden:', error);
+      alert('操作失敗');
+    }
+  };
+
   const today = useMemo(() => new Date().toISOString().split('T')[0], []);
   const yesterday = useMemo(() => new Date(Date.now() - 86400000).toISOString().split('T')[0], []);
 
@@ -480,17 +493,18 @@ function App() {
 
   const filteredPosts = useMemo(() => posts
     .filter(p => {
-      if (currentFilter === '全部') return true;
-      if (currentFilter === '⭐️') return !!p.is_starred;
+      if (currentFilter === '已隱藏') return !!p.is_hidden;
+      if (currentFilter === '全部') return !p.is_hidden;
+      if (currentFilter === '⭐️') return !!p.is_starred && !p.is_hidden;
       if (currentFilter === '今日未發文') {
         const postedDate = p.posted_at ? p.posted_at.split('T')[0] : null;
-        return postedDate !== today;
+        return postedDate !== today && !p.is_hidden;
       }
       if (currentFilter === '今日已發過的') {
-        return p.posted_at && p.posted_at.split('T')[0] === today;
+        return p.posted_at && p.posted_at.split('T')[0] === today && !p.is_hidden;
       }
-      if (currentFilter === '未有照片') return !p.image_ids || p.image_ids.trim().length === 0;
-      return p.category === currentFilter;
+      if (currentFilter === '未有照片') return (!p.image_ids || p.image_ids.trim().length === 0) && !p.is_hidden;
+      return p.category === currentFilter && !p.is_hidden;
     })
     .filter(p => !searchAddress || (p.address && p.address.includes(searchAddress)))
     .filter(p => !searchText || (p.text && p.text.includes(searchText))),
@@ -607,17 +621,14 @@ function App() {
               <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
                 <button onClick={() => setPostCategory('商用')} style={{ flex: 1, padding: '12px 14px', border: '1.5px solid #e8e7e4', background: postCategory === '商用' ? '#b8a88f' : '#fafaf8', color: postCategory === '商用' ? 'white' : '#2c3e50', borderRadius: '10px', fontSize: '0.95rem', fontWeight: '600', fontFamily: 'inherit', transition: 'all 0.3s ease', cursor: 'pointer', height: '44px' }}>商用</button>
                 <button onClick={() => setPostCategory('住用')} style={{ flex: 1, padding: '12px 14px', border: '1.5px solid #e8e7e4', background: postCategory === '住用' ? '#b8a88f' : '#fafaf8', color: postCategory === '住用' ? 'white' : '#2c3e50', borderRadius: '10px', fontSize: '0.95rem', fontWeight: '600', fontFamily: 'inherit', transition: 'all 0.3s ease', cursor: 'pointer', height: '44px' }}>住用</button>
+                <button onClick={() => setShowAccountOptions(!showAccountOptions)} style={{ flex: 0.8, padding: '12px 14px', border: '1.5px solid #e8e7e4', background: showAccountOptions ? '#b8a88f' : '#fafaf8', color: showAccountOptions ? 'white' : '#2c3e50', borderRadius: '10px', fontSize: '0.8rem', fontWeight: '600', fontFamily: 'inherit', transition: 'all 0.3s ease', cursor: 'pointer', height: '44px' }}>
+                  {showAccountOptions ? '▼ 帳' : '▶ 帳'}
+                </button>
               </div>
-              <button onClick={() => setShowAccountOptions(!showAccountOptions)} style={{ display: 'block', width: '100%', padding: '12px 14px', border: '1.5px solid #e8e7e4', background: showAccountOptions ? '#b8a88f' : '#fafaf8', color: showAccountOptions ? 'white' : '#2c3e50', borderRadius: '10px', fontSize: '0.95rem', fontWeight: '600', fontFamily: 'inherit', transition: 'all 0.3s ease', cursor: 'pointer', height: '44px', marginBottom: '16px' }}>
-                {showAccountOptions ? '▼ 隱藏帳號' : '▶ 選擇帳號'}
-              </button>
               {showAccountOptions && (
-                <div>
-                  <label style={{ display: 'block', fontWeight: '600', fontSize: '0.95rem', marginBottom: '10px', color: '#2c3e50', letterSpacing: '0.2px' }}>帳號</label>
-                  <div style={{ display: 'flex', gap: '12px' }}>
-                    <button onClick={() => setPostAccount('account1')} style={{ flex: 1, padding: '12px 14px', border: '1.5px solid #e8e7e4', background: postAccount === 'account1' ? '#b8a88f' : '#fafaf8', color: postAccount === 'account1' ? 'white' : '#2c3e50', borderRadius: '10px', fontSize: '0.95rem', fontWeight: '600', fontFamily: 'inherit', transition: 'all 0.3s ease', cursor: 'pointer', height: '44px' }}>帳號1</button>
-                    <button onClick={() => setPostAccount('account2')} style={{ flex: 1, padding: '12px 14px', border: '1.5px solid #e8e7e4', background: postAccount === 'account2' ? '#b8a88f' : '#fafaf8', color: postAccount === 'account2' ? 'white' : '#2c3e50', borderRadius: '10px', fontSize: '0.95rem', fontWeight: '600', fontFamily: 'inherit', transition: 'all 0.3s ease', cursor: 'pointer', height: '44px' }}>帳號2</button>
-                  </div>
+                <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
+                  <button onClick={() => setPostAccount('account1')} style={{ flex: 1, padding: '12px 14px', border: '1.5px solid #e8e7e4', background: postAccount === 'account1' ? '#b8a88f' : '#fafaf8', color: postAccount === 'account1' ? 'white' : '#2c3e50', borderRadius: '10px', fontSize: '0.95rem', fontWeight: '600', fontFamily: 'inherit', transition: 'all 0.3s ease', cursor: 'pointer', height: '44px' }}>帳號1</button>
+                  <button onClick={() => setPostAccount('account2')} style={{ flex: 1, padding: '12px 14px', border: '1.5px solid #e8e7e4', background: postAccount === 'account2' ? '#b8a88f' : '#fafaf8', color: postAccount === 'account2' ? 'white' : '#2c3e50', borderRadius: '10px', fontSize: '0.95rem', fontWeight: '600', fontFamily: 'inherit', transition: 'all 0.3s ease', cursor: 'pointer', height: '44px' }}>帳號2</button>
                 </div>
               )}
             </div>
@@ -695,7 +706,7 @@ function App() {
         </div>
 
         <div style={{ display: 'flex', gap: '10px', marginBottom: '32px', justifyContent: 'center', flexWrap: 'wrap' }}>
-          {['全部', '⭐️', '商用', '住用', '今日未發文', '今日已發過的', '未有照片'].map((cat) => (
+          {['全部', '⭐️', '商用', '住用', '今日未發文', '今日已發過的', '未有照片', '已隱藏'].map((cat) => (
             <button key={cat} onClick={() => setCurrentFilter(cat)} style={{ padding: '10px 22px', border: '1.5px solid #e8e7e4', background: currentFilter === cat ? '#b8a88f' : 'white', color: currentFilter === cat ? 'white' : '#666', borderRadius: '20px', cursor: 'pointer', fontWeight: '600', fontSize: '0.9rem', transition: 'all 0.3s ease' }}>
               {cat}
             </button>
@@ -823,7 +834,12 @@ function App() {
                         <button onClick={() => copyText(post.address)} style={{ padding: '10px 14px', background: '#b8a88f', color: 'white', border: 'none', borderRadius: '10px', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease' }}>📍 地址</button>
                       )}
                       <button onClick={() => startEdit(post)} style={{ padding: '10px 14px', background: '#d4c5b9', color: '#6b5544', border: 'none', borderRadius: '10px', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease' }}>✏️ 編輯</button>
-                      <button onClick={() => deletePost(post.id)} style={{ padding: '10px 14px', background: '#f0ebe4', color: '#c1665a', border: 'none', borderRadius: '10px', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease', gridColumn: '1 / -1' }}>🗑️ 刪除</button>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '10px' }}>
+                      <button onClick={() => toggleHidden(post.id, post.is_hidden)} style={{ padding: '10px 14px', background: post.is_hidden ? '#f0ebe4' : '#f0ebe4', color: post.is_hidden ? '#c1665a' : '#888', border: 'none', borderRadius: '10px', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease' }}>
+                        {post.is_hidden ? '👁️‍🗨️ 取消隱藏' : '👁️‍🗨️ 隱藏'}
+                      </button>
+                      <button onClick={() => deletePost(post.id)} style={{ padding: '10px 14px', background: '#f0ebe4', color: '#c1665a', border: 'none', borderRadius: '10px', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease' }}>🗑️ 刪除</button>
                     </div>
                   </>
                 )}
