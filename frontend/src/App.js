@@ -800,12 +800,18 @@ function App() {
                       <button onClick={() => toggleStar(post.id, post.is_starred)} style={{ padding: '6px 12px', background: post.is_starred ? '#ffc107' : '#f0ebe4', color: post.is_starred ? 'white' : '#888', border: 'none', borderRadius: '12px', fontSize: '1rem', cursor: 'pointer', transition: 'all 0.3s ease' }}>
                         {post.is_starred ? '⭐' : '☆'}
                       </button>
-                      <button onClick={() => markAsPosted(post.id, 'account1')} style={{ padding: '6px 12px', background: getAccountPostedDate(post.id, 'account1') ? '#7fa87f' : '#f0ebe4', color: getAccountPostedDate(post.id, 'account1') ? 'white' : '#888', border: 'none', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease', whiteSpace: 'nowrap' }}>
-                        {getAccountPostedDate(post.id, 'account1') ? `✓ 本帳 ${getAccountPostedDate(post.id, 'account1').posted_time}` : '本帳'}
-                      </button>
-                      <button onClick={() => markAsPosted(post.id, 'account2')} style={{ padding: '6px 12px', background: getAccountPostedDate(post.id, 'account2') ? '#7fa87f' : '#f0ebe4', color: getAccountPostedDate(post.id, 'account2') ? 'white' : '#888', border: 'none', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease', whiteSpace: 'nowrap' }}>
-                        {getAccountPostedDate(post.id, 'account2') ? `✓ 小帳 ${getAccountPostedDate(post.id, 'account2').posted_time}` : '小帳'}
-                      </button>
+                      <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                        <button onClick={() => markAsPosted(post.id, 'account1')} style={{ padding: '6px 12px', background: getAccountPostedDate(post.id, 'account1') ? '#7fa87f' : '#f0ebe4', color: getAccountPostedDate(post.id, 'account1') ? 'white' : '#888', border: 'none', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease', whiteSpace: 'nowrap', flex: 1 }}>
+                          本帳
+                        </button>
+                        {getAccountPostedDate(post.id, 'account1') && <span style={{ fontSize: '0.75rem', color: '#7fa87f', fontWeight: '600' }}>✓ {getAccountPostedDate(post.id, 'account1').posted_time}</span>}
+                      </div>
+                      <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                        <button onClick={() => markAsPosted(post.id, 'account2')} style={{ padding: '6px 12px', background: getAccountPostedDate(post.id, 'account2') ? '#7fa87f' : '#f0ebe4', color: getAccountPostedDate(post.id, 'account2') ? 'white' : '#888', border: 'none', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease', whiteSpace: 'nowrap', flex: 1 }}>
+                          小帳
+                        </button>
+                        {getAccountPostedDate(post.id, 'account2') && <span style={{ fontSize: '0.75rem', color: '#7fa87f', fontWeight: '600' }}>✓ {getAccountPostedDate(post.id, 'account2').posted_time}</span>}
+                      </div>
                     </div>
                     {post.address && (
                       <div style={{ color: post.category === '商用' ? '#9d7d54' : '#5a7c5b', fontSize: '0.9rem', marginBottom: '12px', padding: '8px 12px', background: post.category === '商用' ? '#e8dcc8' : '#d9e4d4', borderRadius: '8px', borderLeft: `3px solid ${post.category === '商用' ? '#b8a88f' : '#7fa87f'}` }}>
