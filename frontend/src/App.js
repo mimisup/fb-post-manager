@@ -214,7 +214,6 @@ function App() {
 
   const resetForm = () => {
     setPostCategory('商用');
-    setPostAccount('account1');
     setPostAddress('');
     setPostContent('');
     setSelectedImages([]);
