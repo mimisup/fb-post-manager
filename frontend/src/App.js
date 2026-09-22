@@ -568,10 +568,10 @@ function App() {
 
           {isCreateFormOpen && (
           <>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '28px' }}>
-            <button onClick={() => document.getElementById('csvFile').click()} style={{ padding: '12px', background: '#d4c5b9', color: '#6b5544', border: 'none', borderRadius: '10px', fontWeight: '600', cursor: 'pointer' }}>📋 匯入 CSV</button>
+          <div style={{ display: 'flex', gap: '12px', marginBottom: '28px' }}>
+            <button onClick={() => document.getElementById('csvFile').click()} style={{ padding: '8px 14px', background: '#d4c5b9', color: '#6b5544', border: 'none', borderRadius: '8px', fontSize: '0.9rem', fontWeight: '600', cursor: 'pointer', whiteSpace: 'nowrap' }}>📋 匯入 CSV</button>
             {csvData.length > 0 && (
-              <button onClick={importFromCsv} style={{ padding: '12px', background: '#7fa87f', color: 'white', border: 'none', borderRadius: '10px', fontWeight: '600', cursor: 'pointer' }}>✅ 開始匯入 ({csvData.length})</button>
+              <button onClick={importFromCsv} style={{ padding: '8px 14px', background: '#7fa87f', color: 'white', border: 'none', borderRadius: '8px', fontSize: '0.9rem', fontWeight: '600', cursor: 'pointer', whiteSpace: 'nowrap' }}>✅ 開始匯入 ({csvData.length})</button>
             )}
           </div>
           <input type="file" id="csvFile" accept=".csv" onChange={handleCsvUpload} style={{ display: 'none' }} />
