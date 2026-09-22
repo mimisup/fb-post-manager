@@ -480,11 +480,6 @@ function App() {
     }
   };
 
-  const getAccountPostedDate = (postId, account) => {
-    const today = new Date().toISOString().split('T')[0];
-    return postHistory.find(h => h.posted_date === today && h.account === account);
-  };
-
   const today = useMemo(() => new Date().toISOString().split('T')[0], []);
   const yesterday = useMemo(() => new Date(Date.now() - 86400000).toISOString().split('T')[0], []);
 
