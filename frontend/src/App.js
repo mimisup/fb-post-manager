@@ -707,7 +707,7 @@ function App() {
             </div>
           ) : (
             filteredPosts.map(post => (
-              <div key={post.id} style={{ background: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.04)', border: '1px solid rgba(0, 0, 0, 0.02)', display: 'flex', flexDirection: 'column', transition: 'all 0.3s ease' }}>
+              <div key={post.id} style={{ background: 'white', borderRadius: '16px', padding: '16px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.04)', border: '1px solid rgba(0, 0, 0, 0.02)', display: 'flex', flexDirection: 'column', transition: 'all 0.3s ease' }}>
                 {editingId === post.id ? (
                   <>
                     <div style={{ marginBottom: '16px' }}>
@@ -812,7 +812,7 @@ function App() {
                         </div>
                       </div>
                     )}
-                    <div style={{ color: '#2c3e50', fontSize: '0.95rem', lineHeight: '1.6', marginBottom: '16px', maxHeight: '120px', overflowY: 'auto', padding: '12px', background: '#fafaf8', borderRadius: '10px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                    <div style={{ color: '#2c3e50', fontSize: '0.95rem', lineHeight: '1.6', marginBottom: '8px', maxHeight: '120px', overflowY: 'auto', padding: '12px', background: '#fafaf8', borderRadius: '10px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
                       {post.text}
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginTop: 'auto' }}>
